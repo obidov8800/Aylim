@@ -1,5 +1,6 @@
 {% extends 'base_dashboard.html' %}
 {% load static %}
+{# Yordamchi filtrlar endi kerak emas, shuning uchun load olib tashlandi #}
 
 {% block page_title %}Mening Davomatim{% endblock %}
 
@@ -8,50 +9,50 @@
     <h1 class="h2">Mening Davomatim</h1>
 </div>
 
-<div class="card">
-    <div class="card-header">
-        <div class="week-navigation">
-            <a href="{{ request.path }}{{ prev_month_url_params }}" class="btn-edit">&larr; Oldingi oy</a>
-            <h5 class="mb-0">{{ current_month_str }}</h5>
-            <a href="{{ request.path }}{{ next_month_url_params }}" class="btn-edit">Keyingi oy &rarr;</a>
+<div class="card shadow-sm">
+    <div class="card-header bg-light p-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ request.path }}{{ prev_month_url_params }}" class="btn btn-outline-primary btn-sm">&larr; Oldingi</a>
+            <h5 class="mb-0 fw-bold fs-6">{{ current_month_str }}</h5>
+            <a href="{{ request.path }}{{ next_month_url_params }}" class="btn btn-outline-primary btn-sm">Keyingi &rarr;</a>
         </div>
     </div>
-    <div class="card-body">
-        <div class="table-responsive-wrapper">
+    <div class="card-body p-2 p-sm-3">
+        <div class="table-responsive">
             <table class="calendar-table">
                 <thead>
                     <tr>
-                        <th>Du</th><th>Se</th><th>Cho</th><th>Pay</th><th>Ju</th><th>Sha</th><th>Yak</th>
+                        <th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th><th>Sha</th><th>Ya</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for week in month_weeks %}
+                    {% for week in calendar_data %}
                     <tr>
-                        {% for day in week %}
-                            <td class="{% if day.month != current_month_num %}other-month{% endif %} {% if day.weekday == 6 %}weekend{% endif %}">
-                                <div class="day-number">{{ day.day }}</div>
-                                {% for key, record in attendance_map.items %}
-                                    {% if key == day %}
-                                        <span 
-                                            class="status-dot 
-                                            {% if record.status == 'present' %}status-dot-present{% endif %}
-                                            {% if record.status == 'absent' %}status-dot-absent{% endif %}
-                                            {% if record.status == 'partial' %}status-dot-partial{% endif %}"
-                                            title="Holat: {{ record.get_status_display }} {% if record.status == 'partial' %}({{ record }}){% endif %}"
-                                        ></span>
-                                    {% endif %}
-                                {% endfor %}
-                            </td>
+                        {% for day_data in week %}
+                        <td class="
+                            {% if day_data.date.month != current_month_num %}other-month{% endif %}
+                            {% if day_data.date.weekday >= 5 %}weekend{% endif %}
+                            {% if day_data.record %}status-{{ day_data.record.status }}{% endif %}
+                            ">
+                            <div class="day-content" title="{% if day_data.record %}Holat: {{ day_data.record.get_status_display }} {% if day_data.record.status == 'partial' %}({{ day_data.record }}){% endif %}{% else %}{{ day_data.date|date:'d-F' }}{% endif %}">
+                                <span class="day-number">{{ day_data.date.day }}</span>
+                                {% if day_data.record.status == 'partial' %}
+                                    <span class="missed-lessons">{{ day_data.record }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
                         {% endfor %}
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        <div class="d-flex justify-content-center align-items-center mt-4 pt-3 border-top gap-4">
-            <div><span class="legend-dot legend-dot-present"></span> Keldi</div>
-            <div><span class="legend-dot legend-dot-absent"></span> Kelmadi</div>
-            <div><span class="legend-dot legend-dot-partial"></span> Kechikdi</div>
+        
+        <hr class="my-3">
+        <div class="d-flex justify-content-center align-items-center small flex-wrap gap-3">
+            <div class="d-flex align-items-center"><span class="legend-dot status-present me-2"></span> Keldi</div>
+            <div class="d-flex align-items-center"><span class="legend-dot status-absent me-2"></span> Kelmadi</div>
+            <div class="d-flex align-items-center"><span class="legend-dot status-partial me-2"></span> Kechikdi</div>
         </div>
     </div>
 </div>

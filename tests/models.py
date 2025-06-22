@@ -52,35 +52,32 @@ class AnswerOption(models.Model):
 class TestResult(models.Model):
     student = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, related_name='test_results')
     test = models.ForeignKey(TestSchedule, on_delete=models.CASCADE, related_name='results')
-    score = models.IntegerField(verbose_name="To'plangan ball")
+    # ### TUZATISH: Maydon turi o'zgartirildi ###
+    score = models.FloatField(default=0, verbose_name="To'plangan ball")
     completion_time = models.DateTimeField(auto_now_add=True)
     grade = models.CharField(max_length=50, blank=True, null=True, verbose_name="Baho")
     grade_color = models.CharField(max_length=20, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        if self.score >= 90:
+            self.grade = 'A\'lo (5)'
+            self.grade_color = '#28a745'
+        elif self.score >= 80:
+            self.grade = 'Yaxshi (4)'
+            self.grade_color = '#0dcaf0'
+        elif self.score >= 70:
+            self.grade = 'Qoniqarli (3)'
+            self.grade_color = '#ffc107'
+        else:
+            self.grade = 'Qoniqarsiz (2)'
+            self.grade_color = '#dc3545'
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.student.full_name} - {self.test.title}: {self.score}"
     class Meta:
         verbose_name = "Test Natijasi"
         verbose_name_plural = "Test Natijalari"
-    def save(self, *args, **kwargs):
-        # Ballga qarab baho va rang belgilash
-        if self.score >= 90:
-            self.grade = 'A\'lo (5)'
-            self.grade_color = '#28a745' # Yashil
-        elif self.score >= 80:
-            self.grade = 'Yaxshi (4)'
-            self.grade_color = '#0dcaf0' # Moviy
-        elif self.score >= 70:
-            self.grade = 'Qoniqarli (3)'
-            self.grade_color = '#ffc107' # Sariq
-        else:
-            self.grade = 'Qoniqarsiz (2)'
-            self.grade_color = '#dc3545' # Qizil
-            
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.student.full_name} - {self.test.title}: {self.score}"
 
 class Bildirishnoma(models.Model):
     user = models.ForeignKey(StudentProfile, on_delete=models.CASCADE, verbose_name="Foydalanuvchi")
@@ -97,10 +94,14 @@ class Bildirishnoma(models.Model):
 class StudentAnswer(models.Model):
     test_result = models.ForeignKey(TestResult, on_delete=models.CASCADE, related_name='student_answers')
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    selected_answer = models.ForeignKey(AnswerOption, on_delete=models.CASCADE)
+    # TUZATISH: Talaba javob bermagan holatlar uchun null=True, blank=True qo'shildi
+    selected_answer = models.ForeignKey(AnswerOption, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f"{self.question.question_text[:30]} - {self.selected_answer.answer_text[:30]}"
+        if self.selected_answer:
+            return f"{self.question.question_text[:30]} - {self.selected_answer.answer_text[:30]}"
+        return f"{self.question.question_text[:30]} - (Javob berilmagan)"
+        
     class Meta:
         verbose_name = "Talabaning javobi"
         verbose_name_plural = "Talabalarning javoblari"

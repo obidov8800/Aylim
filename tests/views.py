@@ -44,13 +44,19 @@ from django.http import JsonResponse
 import calendar
 from datetime import date, timedelta
 from .models import TestSchedule, Question, AnswerOption, Group, TestResult, StudentAnswer, Bildirishnoma, DarsJadvali, AttendanceRecord
-from .forms import TestScheduleForm, AnswerFormSet, ImportQuestionsForm
+from .forms import TestScheduleForm, QuestionForm, AnswerFormSet, ImportQuestionsForm
 # Testlar ro'yxatini ko'rsatish view'i
+def is_student(user):  # <--- SHU FUNKSIYANI QO'SHING
+    """
+    Foydalanuvchi Talaba ekanligini tekshiradi.
+    """
+    return user.is_authenticated and hasattr(user, 'rol') and user.rol == 'TALABA'
+
 def is_teacher(user):
     return user.is_authenticated and (user.rol == 'PEDAGOG' or user.is_staff)
 
 def is_admin(user):
-    return user.is_authenticated and user.is_staff
+    return user.is_authenticated and user.is_staffff
 
 @login_required
 def test_list_view(request):
@@ -72,6 +78,7 @@ def test_list_view(request):
 
 
 @login_required
+@user_passes_test(is_student)
 def take_test_view(request, test_id):
     test = get_object_or_404(TestSchedule, id=test_id)
     student = request.user
@@ -80,57 +87,103 @@ def take_test_view(request, test_id):
         messages.warning(request, "Siz bu testni allaqachon topshirgansiz.")
         return redirect('tests:test_list')
 
-    # Savollarni tasodifiy tanlash
-    all_questions = list(test.questions.all())
-    num_to_select = min(test.num_questions, len(all_questions))
-    
-    # Agar savollar yetarli bo'lmasa, mavjud barchasini oladi
-    if len(all_questions) < num_to_select:
-        num_to_select = len(all_questions)
-        
-    random_questions = random.sample(all_questions, num_to_select)
-
+    # POST so'rovini qayta ishlash (Testni yakunlash)
     if request.method == 'POST':
+        # YECHIM: Savollar ro'yxatini foydalanuvchi sessiyasidan olamiz
+        question_ids = request.session.get(f'test_attempt_{test_id}')
+        if not question_ids:
+            messages.error(request, "Test seansida xatolik yuz berdi. Iltimos, qaytadan boshlang.")
+            return redirect('tests:test_list')
+        
+        # Sessiyadagi IDlar bo'yicha aniq o'sha savollarni olamiz
+        questions_in_attempt = list(Question.objects.filter(id__in=question_ids))
+        
+        # Tekshiruv: Barcha savollarga javob berilganmi?
+        all_answered = True
+        for question in questions_in_attempt:
+            if f'question_{question.id}' not in request.POST:
+                all_answered = False
+                break
+        
+        if not all_answered:
+            messages.error(request, "Iltimos, barcha savollarga javob bering. Javob berilmagan savollar qizil rangda belgilandi.")
+            # Xatolik yuz bersa ham, belgilangan javoblarni saqlab qolish uchun
+            context = {
+                'test': test,
+                'questions': questions_in_attempt, # Qayta o'sha savollarni ko'rsatamiz
+                'submitted_answers': request.POST, # Kiritilgan javoblarni qaytaramiz
+                'unanswered_question_ids': [q.id for q in questions_in_attempt if f'question_{q.id}' not in request.POST],
+                'active_page': 'testlar'
+            }
+            return render(request, 'tests/take_test.html', context)
+        
+        # Agar hamma narsa to'g'ri bo'lsa, natijani hisoblaymiz
         correct_answers_count = 0
         result = TestResult.objects.create(student=student, test=test, score=0)
-
-        for question in random_questions:
-            selected_answer_id = request.POST.get(f'question_{question.id}')
-            if selected_answer_id:
+        with transaction.atomic():
+            for question in questions_in_attempt:
+                selected_answer_id = request.POST.get(f'question_{question.id}')
                 selected_answer = get_object_or_404(AnswerOption, id=selected_answer_id)
-                StudentAnswer.objects.create(test_result=result, question=question, selected_answer=selected_answer)
                 if selected_answer.is_correct:
                     correct_answers_count += 1
-        
-        # 100-ballik tizimda hisoblash
-        score = round((100 / num_to_select) * correct_answers_count) if num_to_select > 0 else 0
+                StudentAnswer.objects.create(test_result=result, question=question, selected_answer=selected_answer)
+
+        score = round((100 / len(questions_in_attempt)) * correct_answers_count) if questions_in_attempt else 0
         result.score = score
         result.save()
+        
+        # Ishlatilgan sessiyani tozalaymiz
+        del request.session[f'test_attempt_{test_id}']
 
+        messages.success(request, f"Test yakunlandi! Natijangiz: {score} ball")
         return redirect('tests:test_result_detail', result_id=result.id)
 
-    context = {'test': test, 'questions': random_questions, 'active_page': 'testlar'}
-    return render(request, 'tests/take_test.html', context)
+    # GET so'rovi (Testni boshlash)
+    else:
+        all_questions = list(test.questions.all())
+        if not all_questions:
+            messages.error(request, "Ushbu testda hali savollar mavjud emas.")
+            return redirect('tests:test_list')
+        
+        num_to_select = test.num_questions if 0 < test.num_questions <= len(all_questions) else len(all_questions)
+        random_questions = random.sample(all_questions, num_to_select)
+        
+        # YECHIM: Tasodifiy tanlangan savollar ro'yxatini sessiyaga saqlab qo'yamiz
+        request.session[f'test_attempt_{test_id}'] = [q.id for q in random_questions]
+
+        context = {'test': test, 'questions': random_questions, 'active_page': 'testlar'}
+        return render(request, 'tests/take_test.html', context)
 
 
 @login_required
 def test_result_detail_view(request, result_id):
-    result = get_object_or_404(TestResult, id=result_id, student=request.user)
-    student_answers = {sa.question_id: sa.selected_answer for sa in result.student_answers.all()}
+    result = get_object_or_404(TestResult, id=result_id)
     
-    # Natijalarni tayyorlash
-    detailed_results = []
-    # TestResult bilan bog'liq bo'lgan savollarni olish
-    questions_in_result = Question.objects.filter(id__in=student_answers.keys())
+    if not request.user.is_staff and result.student != request.user:
+        messages.error(request, "Sizga bu natijani ko'rishga ruxsat berilmagan.")
+        return redirect('tests:test_list')
 
-    for question in questions_in_result:
+    student_answers_qs = result.student_answers.select_related('question', 'selected_answer').order_by('question_id')
+    
+    # ### YANGILIK: To'g'ri javoblar sonini hisoblash ###
+    correct_answers_count = student_answers_qs.filter(selected_answer__is_correct=True).count()
+    total_questions_in_attempt = student_answers_qs.count()
+
+    detailed_results = []
+    for answer_record in student_answers_qs:
         detailed_results.append({
-            'question': question,
-            'all_options': question.answer_options.all(),
-            'selected_answer': student_answers.get(question.id)
+            'question': answer_record.question,
+            'options': answer_record.question.answer_options.all(),
+            'selected_answer': answer_record.selected_answer,
         })
 
-    context = {'result': result, 'detailed_results': detailed_results, 'active_page': 'testlar'}
+    context = {
+        'result': result, 
+        'detailed_results': detailed_results,
+        'correct_answers_count': correct_answers_count,
+        'total_questions_in_attempt': total_questions_in_attempt,
+        'active_page': 'testlar'
+    }
     return render(request, 'tests/test_result_detail.html', context)
 
 @user_passes_test(is_admin) # Faqat adminlar kirishi mumkin
@@ -212,94 +265,81 @@ def export_results_pdf_view(request):
     response.write(pdf)
     return response
 
-def is_teacher(user):
-    """
-    Foydalanuvchi Pedagog yoki Admin ekanligini tekshiradi.
-    """
-    return user.is_authenticated and (user.rol == 'PEDAGOG' or user.is_staff)
 
+
+@login_required
 @user_passes_test(is_teacher)
 def import_questions_from_file_view(request, test_id):
-    test_schedule = get_object_or_404(TestSchedule, id=test_id)
+    test_schedule = get_object_or_404(TestSchedule, id=test_id, author=request.user)
 
     if request.method == 'POST':
         form = ImportQuestionsForm(request.POST, request.FILES)
         if form.is_valid():
             uploaded_file = request.FILES['file']
-            questions_count = 0
+            
+            questions_added_count = 0
+            questions_skipped_count = 0
 
             try:
-                # --- .DOCX fayllar uchun mantiq ---
-                if uploaded_file.name.endswith('.docx'):
-                    document = docx.Document(uploaded_file)
-                    full_text = "\n".join([para.text for para in document.paragraphs])
-                    
-                    question_blocks = re.split(r'\n(?=\d+\.\s)', full_text.strip())
+                if not uploaded_file.name.endswith('.docx'):
+                    messages.error(request, "Fayl formati noto'g'ri. Faqat .docx fayllari qabul qilinadi.")
+                    return redirect('tests:import_questions', test_id=test_schedule.id)
 
+                document = docx.Document(uploaded_file)
+                full_text = "\n".join([para.text for para in document.paragraphs if para.text.strip()])
+                question_blocks = re.split(r'\n(?=\d+\.\s)', full_text.strip())
+
+                with transaction.atomic():
                     for block in question_blocks:
-                        if not block.strip():
+                        if not block.strip(): continue
+                        lines = [line.strip() for line in block.strip().split('\n') if line.strip()]
+                        question_match = re.match(r'^\d+\.\s*(.+)', lines[0])
+                        if not question_match:
+                            questions_skipped_count += 1
                             continue
 
-                        lines = [line.strip() for line in block.strip().split('\n') if line.strip()]
-                        
-                        question_match = re.match(r'^\d+\.\s*(.*)', lines[0])
-                        if not question_match:
-                            continue
                         question_text = question_match.group(1).strip()
+                        options, correct_answer_char = {}, None
                         
-                        question_obj = Question.objects.create(test_schedule=test_schedule, question_text=question_text)
-                        
-                        options = {}
-                        correct_answer_char = ''
                         for line in lines[1:]:
-                            option_match = re.match(r'^([a-d]|A-D)\)\s*(.*)', line)
-                            if option_match:
-                                # XATOLIK TUZATILDI: toUpperCase() -> upper()
-                                char = option_match.group(1).upper()
-                                text = option_match.group(2).strip()
-                                options[char] = text
-                            
+                            option_match = re.match(r'^\s*([A-D])\)\s*(.+)', line, re.IGNORECASE)
                             correct_match = re.search(r'To‘g‘ri javob:\s*([A-D])', line, re.IGNORECASE)
-                            if correct_match:
+                            if option_match:
+                                options[option_match.group(1).upper()] = option_match.group(2).strip()
+                            elif correct_match:
                                 correct_answer_char = correct_match.group(1).upper()
 
+                        if not options or not correct_answer_char or correct_answer_char not in options:
+                            questions_skipped_count += 1
+                            continue
+
+                        question_obj = Question.objects.create(test_schedule=test_schedule, question_text=question_text)
                         for char, text in options.items():
-                            AnswerOption.objects.create(
-                                question=question_obj,
-                                answer_text=text,
-                                is_correct=(char == correct_answer_char)
-                            )
-                        questions_count += 1
+                            AnswerOption.objects.create(question=question_obj, answer_text=text, is_correct=(char == correct_answer_char))
+                        questions_added_count += 1
                 
-                # --- Excel/CSV fayllar uchun eski mantiq ---
-                elif uploaded_file.name.endswith(('.xls', '.xlsx', '.csv')):
-                    # ... excel/csv uchun mantiq ...
-                    pass
-
-                else:
-                    messages.error(request, "Fayl formati noto'g'ri. Faqat .docx, .xlsx, .xls, .csv fayllari qabul qilinadi.")
-                    return render(request, 'tests/import_questions.html', {'form': form, 'test_schedule': test_schedule})
-
-                # Testning savollar sonini yangilash
                 test_schedule.num_questions = test_schedule.questions.count()
                 test_schedule.save()
 
-                messages.success(request, f"{questions_count} ta savol va ularning javoblari muvaffaqiyatli import qilindi!")
-                return redirect('tests:teacher_test_list')
+                if questions_added_count > 0:
+                    messages.success(request, f"{questions_added_count} ta savol muvaffaqiyatli import qilindi!")
+                if questions_skipped_count > 0:
+                    messages.warning(request, f"{questions_skipped_count} ta savol fayldagi format xatoligi tufayli o'tkazib yuborildi.")
+                
+                return redirect('tests:edit_test', test_id=test_schedule.id)
 
             except Exception as e:
-                messages.error(request, f"Faylni qayta ishlashda xatolik yuz berdi: {e}")
+                messages.error(request, f"Faylni qayta ishlashda kutilmagan xatolik yuz berdi: {e}")
+                return redirect('tests:import_questions', test_id=test_schedule.id)
     else:
         form = ImportQuestionsForm()
 
     context = {
         'form': form,
         'test_schedule': test_schedule,
-        'title': f"'{test_schedule.title}' testi uchun savollarni import qilish",
-        'active_page': 'mening_testlarim',
+        'title': f"'{test_schedule.title}' testi uchun savollarni import qilish"
     }
     return render(request, 'tests/import_questions.html', context)
-
 
 @login_required
 @user_passes_test(is_teacher)
@@ -325,53 +365,81 @@ def delete_test_view(request, test_id):
 @user_passes_test(is_teacher)
 def test_constructor_view(request, test_id=None):
     if test_id:
-        instance = get_object_or_404(TestSchedule, id=test_id)
-        title = "Test Konstruktori: Tahrirlash"
+        test = get_object_or_404(TestSchedule, pk=test_id, author=request.user)
+        title = "Testni tahrirlash"
     else:
-        # Yangi test yaratishda muallifni belgilash
-        instance = TestSchedule(author=request.user if request.user.is_authenticated else None)
-        title = "Test Konstruktori: Yaratish"
+        test = None
+        title = "Yangi test yaratish"
 
     QuestionFormSet = inlineformset_factory(
-        TestSchedule, Question, fields=('question_text',),
-        extra=1, can_delete=True,
-        widgets={'question_text': forms.Textarea(attrs={'class': 'form-control', 'rows': 2})}
+        TestSchedule, Question, form=QuestionForm,
+        extra=1, can_delete=True
     )
-    import_form = ImportQuestionsForm()
 
     if request.method == 'POST':
-        action = request.POST.get('action')
-
-        if action == 'save_test':
-            form = TestScheduleForm(request.POST, instance=instance)
-            question_formset = QuestionFormSet(request.POST, instance=instance, prefix='questions')
-
-            if form.is_valid() and question_formset.is_valid():
-                # ... (saqlash logikasi avvalgidek) ...
-                messages.success(request, "Test muvaffaqiyatli saqlandi.")
-                return redirect('tests:edit_test', test_id=form.instance.id)
-            else:
-                messages.error(request, "Formani to'ldirishda xatoliklar mavjud.")
+        form = TestScheduleForm(request.POST, instance=test)
         
-        elif action == 'import_questions' and instance.pk:
-            # ... (import logikasi avvalgidek) ...
-            return redirect('tests:edit_test', test_id=instance.id)
+        # Yangi test bo'lsa, uni avval saqlab, ID olamiz
+        if test is None:
+            if form.is_valid():
+                instance = form.save(commit=False)
+                instance.author = request.user
+                instance.save()
+                messages.success(request, "Test yaratildi. Endi savollarni qo'shing.")
+                return redirect('tests:edit_test', test_id=instance.id)
+            # Agar form xato bo'lsa, `formset` bo'sh bo'ladi
+            formset = QuestionFormSet(instance=test)
+        
+        # Mavjud test tahrirlanayotgan bo'lsa
+        else:
+            formset = QuestionFormSet(request.POST, instance=test, prefix='questions')
+            if form.is_valid() and formset.is_valid():
+                with transaction.atomic():
+                    saved_test = form.save()
+                    questions = formset.save() # Savollar saqlandi
 
-    # BU QISM `if request.method == 'POST'` DAN TASHQARIDA BO'LISHI KERAK
-    form = TestScheduleForm(instance=instance)
-    question_formset = QuestionFormSet(instance=instance, prefix='questions')
-    for q_form in question_formset:
-        q_form.answer_formset = AnswerFormSet(instance=q_form.instance, prefix=f'answers_{q_form.prefix}')
+                    all_answers_valid = True
+                    for question in questions:
+                        # Har bir savol uchun uning javob formsetini olamiz va tekshiramiz
+                        answer_formset = AnswerFormSet(request.POST, instance=question, prefix=f'answers_{question.id}')
+                        if not answer_formset.is_valid():
+                            all_answers_valid = False
+                            messages.error(request, f"'{question.question_text[:30]}...' savolining javoblarida xatolik bor. Iltimos, to'g'ri javobni belgilang.")
+                            break
+                    
+                    if all_answers_valid:
+                        # Agar barcha javoblar to'g'ri bo'lsa, ularni ham saqlaymiz
+                        for question in questions:
+                            answer_formset = AnswerFormSet(request.POST, instance=question, prefix=f'answers_{question.id}')
+                            answer_formset.save()
+                        messages.success(request, "Test muvaffaqiyatli saqlandi.")
+                        return redirect('tests:edit_test', test_id=saved_test.id)
+                    else:
+                        transaction.set_rollback(True) # Xatolik bo'lsa, o'zgarishlarni bekor qilamiz
+            else:
+                messages.error(request, "Iltimos, formadagi xatoliklarni to'g'rilang.")
+
+    else: # GET so'rovi (sahifani birinchi marta ochganda)
+        form = TestScheduleForm(instance=test)
+        formset = QuestionFormSet(instance=test, prefix='questions')
+
+    # ### ENG ASOSIY TUZATISH: JAVOB VARIANTLARINI ANDOZAGA YUBORISH ###
+    # Bu qism endi har doim, GET so'rovida ham, POST'dagi xatolikda ham ishlaydi
+    for q_form in formset:
+        if request.method == 'POST':
+            # Agar POST'da xatolik bo'lsa, kiritilgan ma'lumotlarni yo'qotmasdan formsetni qayta yaratamiz
+            q_form.answer_formset = AnswerFormSet(request.POST, instance=q_form.instance, prefix=f'answers_{q_form.instance.id}' if q_form.instance.pk else f'answers_new_{q_form.prefix}')
+        else:
+            # GET so'rovida oddiy formset yaratamiz
+            q_form.answer_formset = AnswerFormSet(instance=q_form.instance, prefix=f'answers_{q_form.instance.id}' if q_form.instance.pk else f'answers_new_{q_form.prefix}')
 
     context = {
         'form': form,
-        'question_formset': question_formset,
-        'import_form': import_form,
+        'question_formset': formset,
         'title': title,
-        'test': instance,
+        'test': test,
         'active_page': 'mening_testlarim',
     }
-    # FUNKSIYANING ENG OXIRGI QATORI
     return render(request, 'tests/test_constructor.html', context)
 
 @login_required
@@ -395,6 +463,7 @@ def timetable_view(request):
     return render(request, 'tests/timetable.html', context)
 
 @login_required
+@user_passes_test(is_student)  # is_student funksiyasi tepada e'lon qilingan bo'lishi kerak
 def attendance_student_view(request):
     student = request.user
     today = date.today()
@@ -403,7 +472,6 @@ def attendance_student_view(request):
         "", "Yanvar", "Fevral", "Mart", "Aprel", "May", "Iyun",
         "Iyul", "Avgust", "Sentyabr", "Oktyabr", "Noyabr", "Dekabr"
     ]
-    UZBEK_WEEKDAYS = ["Dushanba", "Seshanba", "Chorshanba", "Payshanba", "Juma", "Shanba", "Yakshanba"]
 
     try:
         year = int(request.GET.get('year', today.year))
@@ -417,27 +485,41 @@ def attendance_student_view(request):
     cal = calendar.Calendar()
     month_weeks = cal.monthdatescalendar(year, month)
     
+    first_day_of_cal = month_weeks[0][0]
+    last_day_of_cal = month_weeks[-1][-1]
     records = AttendanceRecord.objects.filter(
         student=student, 
-        date__year=year,
-        date__month=month
+        date__range=(first_day_of_cal, last_day_of_cal)
     )
     
-    # Davomatni sana bo'yicha tez topish uchun lug'at yaratamiz
     attendance_map = {rec.date: rec for rec in records}
+
+    # YECHIM: Ma'lumotlarni andoza uchun qulay 'calendar_data' formatiga o'tkazish
+    calendar_data = []
+    for week in month_weeks:
+        week_data = []
+        for day_date in week:
+            week_data.append({
+                'date': day_date,
+                'record': attendance_map.get(day_date)
+            })
+        calendar_data.append(week_data)
 
     # Oldingi va keyingi oylar uchun linklar
     prev_month_date = current_month_date - timedelta(days=1)
-    next_month_date = (current_month_date + timedelta(days=32)).replace(day=1)
+    prev_month_url_params = f"?year={prev_month_date.year}&month={prev_month_date.month}"
+    
+    next_month_date = current_month_date + timedelta(days=32)
+    next_month_date = next_month_date.replace(day=1)
+    next_month_url_params = f"?year={next_month_date.year}&month={next_month_date.month}"
 
     context = {
         'active_page': 'davomat',
-        'month_weeks': month_weeks,
-        'attendance_map': attendance_map,
+        'calendar_data': calendar_data,
         'current_month_num': month,
         'current_month_str': f"{UZBEK_MONTHS[month]}, {year}",
-        'prev_month_url': f'?year={prev_month_date.year}&month={prev_month_date.month}',
-        'next_month_url': f'?year={next_month_date.year}&month={next_month_date.month}',
+        'prev_month_url_params': prev_month_url_params,
+        'next_month_url_params': next_month_url_params,
     }
     return render(request, 'tests/attendance_student.html', context)
 

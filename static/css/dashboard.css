@@ -594,34 +594,95 @@ body {
     padding: 2px 4px;
     text-align: center;
 }
-.calendar-table td.status-present {
-    background-color: #d1e7dd; /* Yashil fon */
-    color: #0f5132; /* To'q yashil matn */
-    font-weight: 700;
+.calendar-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px; /* Katakchalar orasida joy ochadi */
+    table-layout: fixed;
 }
-.calendar-table td.status-absent {
-    background-color: #f8d7da; /* Qizil fon */
-    color: #842029; /* To'q qizil matn */
-    font-weight: 700;
+
+.calendar-table th {
+    font-weight: 600;
+    text-align: center;
+    padding: 0.5rem 0.1rem;
+    font-size: 0.85rem;
+    color: #6c757d;
 }
-.calendar-table td.status-partial {
-    background-color: #fff3cd; /* Sariq fon */
-    color: #664d03; /* To'q sariq matn */
+
+.calendar-table td {
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Har bir kun uchun asosiy stil */
+.day-content {
+    display: flex;
+    flex-direction: column; /* Raqam va soatni ustma-ust chiqarish uchun */
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Katakchani doim kvadrat saqlaydi */
+    border-radius: 8px; /* Qirralari yumaloq kvadrat */
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #f0f0f0;
+    background-color: #ffffff;
+    padding: 4px;
+}
+
+.day-content:hover {
+    cursor: help;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.day-number {
+    font-size: 1.1rem; /* Kun raqami */
+}
+
+.missed-lessons {
+    font-size: 0.75rem; /* Kechikkan darslar soni */
     font-weight: 700;
 }
 
-/* Legend (izoh) qismidagi rangli belgilar uchun */
+/* Boshqa oy kunlari uchun stil */
+.calendar-table .other-month .day-content {
+    color: #d0d0d0;
+    background-color: #f8f9fa;
+    border-color: transparent;
+}
+
+/* --- Status Ranglari --- */
+.status-present .day-content {
+    background-color: #d1e7dd;
+    border-color: #a3cfbb;
+    color: #0f5132;
+}
+
+.status-absent .day-content {
+    background-color: #f8d7da;
+    border-color: #f1b0b7;
+    color: #842029;
+}
+
+.status-partial .day-content {
+    background-color: #fff3cd;
+    border-color: #ffe69c;
+    color: #664d03;
+}
+
+/* --- Izoh (Legend) uchun stillar --- */
 .legend-dot {
     display: inline-block;
-    width: 15px;
-    height: 15px;
+    width: 1rem;
+    height: 1rem;
     border-radius: 4px;
-    margin-right: 8px;
-    vertical-align: middle;
 }
-.legend-dot-present { background-color: #d1e7dd; border: 1px solid #a3cfbb; }
-.legend-dot-absent { background-color: #f8d7da; border: 1px solid #f1b0b7; }
-.legend-dot-partial { background-color: #fff3cd; border: 1px solid #ffe69c; }
+.legend-dot.status-present { background-color: #d1e7dd; border: 1px solid #a3cfbb; }
+.legend-dot.status-absent { background-color: #f8d7da; border: 1px solid #f1b0b7; }
+.legend-dot.status-partial { background-color: #fff3cd; border: 1px solid #ffe69c; }
 .test-card-container {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive grid */
@@ -662,4 +723,60 @@ body {
     margin-top: auto; /* Tugmani har doim pastga yopishtiradi */
     padding-top: 1rem;
     border-top: 1px solid var(--border-color);
+}
+.test-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e2e8f0; /* var(--border-color) */
+}
+
+.test-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-footer {
+    border-top: 1px solid #e2e8f0 !important; /* var(--border-color) */
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+.question-result-block {
+    background-color: #f8f9fa;
+}
+.list-group-item .fa-check-circle {
+    font-size: 1.2rem;
+}
+.list-group-item .fa-times-circle {
+    font-size: 1.2rem;
+}
+.options-container .form-check-input[type="radio"] {
+    /* Barcha eski, xato ishlayotgan stillarni bekor qilish */
+    -webkit-appearance: radio !important;
+    -moz-appearance: radio !important;
+    appearance: radio !important;
+    
+    /* Bootstrap'ning standart radio tugmasi ko'rinishiga keltirish */
+    border-radius: 50% !important;
+    height: 1.25em !important;
+    width: 1.25em !important;
+    margin-top: 0.15em !important;
+    border: 1px solid #b0b0b0 !important;
+    background-color: #fff !important;
+}
+
+/* Tanlangan radio tugma uchun stil */
+.options-container .form-check-input[type="radio"]:checked {
+    border-color: var(--primary-color) !important;
+    background-color: var(--primary-color) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e") !important;
+}
+
+/* Radio tugma fokusda bo'lganda */
+.options-container .form-check-input[type="radio"]:focus {
+    box-shadow: 0 0 0 0.2rem rgba(74, 105, 226, 0.25) !important;
+}
+
+.options-container .form-check-label {
+    padding-left: 0.5em;
 }
