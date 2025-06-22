@@ -1,0 +1,29 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Testni o'chirish{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1>Testni o'chirishni tasdiqlang</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p class="fs-5">
+            Siz haqiqatan ham <strong>"{{ test.title }}"</strong> nomli testni o'chirmoqchimisiz?
+        </p>
+        <p class="text-muted">
+            Bu amalni orqaga qaytarib bo'lmaydi. Test bilan birga unga bog'liq barcha savollar va natijalar ham o'chib ketadi.
+        </p>
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            <div class="btn-group">
+                <button type="submit" class="btn-edit" style="background-color: #d9534f;">Ha, o'chirish</button>
+                <a href="{% url 'tests:teacher_test_list' %}" class="btn-edit" style="background-color: #6c757d;">Bekor qilish</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

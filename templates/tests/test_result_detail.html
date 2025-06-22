@@ -1,0 +1,43 @@
+{% extends 'base_dashboard.html' %}
+{% block page_title %}Test Natijasi{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1>Natija: {{ result.test.title }}</h1>
+</div>
+
+<div class="card text-center mb-4">
+    <div class="card-body">
+        <h3 class="card-title">Sizning umumiy ballingiz:</h3>
+        <p class="display-3 fw-bold" style="color: {{ result.grade_color|default:'black' }};">{{ result.score }}</p>
+        <p class="h4">Baho: <span class="fw-bold">{{ result.grade }}</span></p>
+    </div>
+</div>
+
+<h3 class="mt-5 mb-3">Javoblar tahlili</h3>
+{% for item in detailed_results %}
+<div class="card mb-3">
+    <div class="card-header">
+        <strong>{{ forloop.counter }}. Savol:</strong> {{ item.question.question_text }}
+    </div>
+    <ul class="list-group list-group-flush">
+        {% for option in item.all_options %}
+            {% if option.is_correct %}
+                <li class="list-group-item list-group-item-success">
+                    <i class="fas fa-check-circle me-2"></i> {{ option.answer_text }}
+                    {% if option == item.selected_answer %}<span class="badge bg-primary ms-2">Sizning javobingiz</span>{% endif %}
+                </li>
+            {% elif option == item.selected_answer %}
+                 <li class="list-group-item list-group-item-danger">
+                    <i class="fas fa-times-circle me-2"></i> {{ option.answer_text }} <span class="badge bg-danger ms-2">Sizning javobingiz</span>
+                </li>
+            {% else %}
+                <li class="list-group-item">{{ option.answer_text }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+</div>
+{% endfor %}
+
+<a href="{% url 'tests:test_list' %}" class="btn-edit mt-3">Testlar ro'yxatiga qaytish</a>
+{% endblock %}  

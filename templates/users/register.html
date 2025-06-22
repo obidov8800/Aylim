@@ -1,0 +1,160 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ro'yxatdan o'tish - Aylim Tibbiyot</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        body {
+            font-family: "Inter", sans-serif; /* Chiroyliroq shrift */
+            background-color: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 550px; /* Formani biroz kengaytiramiz */
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            padding: 40px;
+        }
+        .card-title {
+            text-align: center;
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: #1a202c;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4a5568;
+        }
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .form-control:focus {
+            border-color: #4A90E2;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+        .btn-submit {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            background-color: #28a745;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .btn-submit:hover {
+            background-color: #218838;
+        }
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        .password-wrapper .form-control {
+            padding-right: 40px; /* Ikona uchun joy */
+        }
+        .password-toggle-icon {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: #718096;
+        }
+        .text-center {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .text-center a {
+            color: #4A90E2;
+            text-decoration: none;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h2 class="card-title">Ro'yxatdan O'tish</h2>
+<form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.name == 'password' %}
+                            <div class="password-wrapper">
+                                {{ field }}
+                                <i class="fas fa-eye password-toggle-icon" id="password-toggle"></i>
+                            </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <div style="color: red; font-size: 12px; margin-top: 5px;">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn-submit">Ro'yxatdan o'tish</button>
+            </form>
+            <div class="text-center">
+                <p>Hisobingiz bormi? <a href="{% url 'login' %}">Tizimga kirish</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('password-toggle');
+            const passwordField = document.getElementById('id_password');
+
+            if (togglePassword && passwordField) {
+                togglePassword.addEventListener('click', function (e) {
+                    // Parol maydonining turini o'zgartirish (password/text)
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    
+                    // Ikonani o'zgartirish (ko'z/yopiq ko'z)
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

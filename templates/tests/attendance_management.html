@@ -1,0 +1,207 @@
+{% extends 'base_dashboard.html' %}
+{% block page_title %}Davomatni Boshqarish{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1 class="h2">Davomatni Boshqarish</h1>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="attendance-controls">
+            <div class="form-group mb-0">
+                <label for="group-select" class="form-label">Guruhni tanlang:</label>
+                <select id="group-select" class="form-control" style="min-width: 200px;">
+                    <option value="">---------</option>
+                    {% for group in groups %}
+                        <option value="{{ group.id }}">{{ group.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-0">
+                <label for="month-select" class="form-label">Oyni tanlang:</label>
+                <input type="month" id="month-select" class="form-control">
+            </div>
+        </div>
+        <div id="week-navigation-container" class="mt-4"></div>
+        <div id="attendance-grid-container" class="mt-2">
+            <p class="text-muted">Iltimos, yuqoridan guruh va oyni tanlang.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Kerakli HTML elementlarni topib olamiz
+    const groupSelect = document.getElementById('group-select');
+    const monthSelect = document.getElementById('month-select');
+    const container = document.getElementById('attendance-grid-container');
+    const navContainer = document.getElementById('week-navigation-container');
+    // CSRF tokenini xavfsiz yo'l bilan olamiz
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || '{{ csrf_token }}';
+
+    // Joriy hafta raqamini saqlash uchun o'zgaruvchi
+    let currentWeek = 0;
+    
+    // Sahifa ochilganda joriy oyni tanlab qo'yish
+    const today = new Date();
+    monthSelect.value = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}`;
+
+    // 2. Kompyuter uchun jadval chizadigan yordamchi funksiya
+    function buildDesktopTable(data) {
+        let tableHtml = `<div class="table-responsive-wrapper attendance-desktop-view"><table class="attendance-table"><thead><tr><th class="student-name">Talaba</th>`;
+        data.week_days.forEach(day => {
+            // `day` endi obyekt, uning `day` xususiyatini ishlatamiz
+            tableHtml += `<th class="${day.is_current_month ? '' : 'text-muted'}">${day.day}</th>`;
+        });
+        tableHtml += `</tr></thead><tbody>`;
+
+        data.students_data.forEach(student => {
+            tableHtml += `<tr><td class="student-name">${student.full_name}</td>`;
+            student.dates.forEach(day_data => {
+                const dayDate = new Date(day_data.date + 'T00:00:00Z');
+                const isWeekend = dayDate.getUTCDay() === 0; // Yakshanba
+                let cellClass = `day-cell ${!day_data.is_current_month ? 'other-month' : ''} ${isWeekend ? 'weekend' : ''}`;
+                
+                // Statusga qarab rang berish
+                if (day_data.status === '+') cellClass += ' status-present';
+                else if (day_data.status === '-') cellClass += ' status-absent';
+                else if (day_data.status.includes('/')) cellClass += ' status-partial';
+                
+                tableHtml += `<td class="${cellClass}" data-student-id="${student.id}" data-date="${day_data.date}">${day_data.status}</td>`;
+            });
+            tableHtml += `</tr>`;
+        });
+        tableHtml += `</tbody></table></div>`;
+        return tableHtml;
+    }
+
+    // 3. Mobil uchun ro'yxat chizadigan yordamchi funksiya
+    function buildMobileList(data) {
+        let mobileHtml = '<div class="attendance-mobile-view">';
+        data.students_data.forEach(student => {
+            mobileHtml += `<div class="student-attendance-card"><h5>${student.full_name}</h5>`;
+            student.dates.forEach(day_data => {
+                if (day_data.is_current_month) {
+                    const dayDate = new Date(day_data.date + 'T00:00:00Z');
+                    const dayName = ['Yak', 'Du', 'Se', 'Cho', 'Pay', 'Ju', 'Sha'][dayDate.getUTCDay()];
+                    const isWeekend = dayDate.getUTCDay() === 0;
+                    let statusClass = 'text-muted';
+                    if (day_data.status === '+') statusClass = 'text-success fw-bold';
+                    else if (day_data.status === '-') statusClass = 'text-danger fw-bold';
+                    else if (day_data.status.includes('/')) statusClass = 'text-warning fw-bold';
+
+                    mobileHtml += `<div class="attendance-day-row day-cell ${isWeekend ? 'weekend' : ''}" data-student-id="${student.id}" data-date="${day_data.date}">
+                                        <span>${day_data.day} - ${dayName}</span>
+                                        <strong class="${statusClass}">${day_data.status || 'N/A'}</strong>
+                                   </div>`;
+                }
+            });
+            mobileHtml += `</div>`;
+        });
+        mobileHtml += '</div>';
+        return mobileHtml;
+    }
+
+    // 4. Serverdan ma'lumot olib, sahifani yangilaydigan asosiy funksiya
+    function fetchAndRender() {
+        const groupId = groupSelect.value;
+        const monthValue = monthSelect.value;
+        if (!groupId || !monthValue) {
+            container.innerHTML = '<p class="text-muted">Iltimos, yuqoridan guruh va oyni tanlang.</p>';
+            navContainer.innerHTML = '';
+            return;
+        }
+        
+        const [year, month] = monthValue.split('-');
+        container.innerHTML = '<p>Yuklanmoqda...</p>';
+        navContainer.innerHTML = '';
+
+        fetch(`/tests/ajax/get-attendance-data/?group_id=${groupId}&year=${year}&month=${month}&week=${currentWeek}`)
+            .then(response => {
+                if (!response.ok) throw new Error('Server javobida xatolik');
+                return response.json();
+            })
+            .then(data => {
+                navContainer.innerHTML = `
+                    <div class="week-navigation">
+                        <button id="prev-week" class="btn-edit" ${data.week_num === 0 ? 'disabled' : ''}>&larr; Oldingi</button>
+                        <strong>${data.month_name} ${data.year}, ${data.week_num + 1}-hafta</strong>
+                        <button id="next-week" class="btn-edit" ${data.week_num + 1 >= data.total_weeks ? 'disabled' : ''}>Keyingi &rarr;</button>
+                    </div>`;
+
+                container.innerHTML = buildDesktopTable(data) + buildMobileList(data);
+
+                document.getElementById('prev-week')?.addEventListener('click', () => { currentWeek--; fetchAndRender(); });
+                document.getElementById('next-week')?.addEventListener('click', () => { currentWeek++; fetchAndRender(); });
+            }).catch(error => {
+                console.error('Xatolik:', error);
+                container.innerHTML = '<p class="text-danger">Ma\'lumotlarni yuklashda xatolik yuz berdi.</p>';
+            });
+    }
+
+    function resetAndFetch() { currentWeek = 0; fetchAndRender(); }
+    groupSelect.addEventListener('change', resetAndFetch);
+    monthSelect.addEventListener('change', resetAndFetch);
+
+    // 5. Davomatni belgilash va saqlash uchun klikni eshituvchi
+    container.addEventListener('click', function(e) {
+        let cell = e.target.closest('.day-cell');
+        if (cell && !cell.classList.contains('weekend') && !cell.classList.contains('other-month')) {
+            const currentStatusText = cell.querySelector('strong')?.textContent || cell.textContent;
+            const currentStatus = currentStatusText.trim();
+            
+            const body = new URLSearchParams({
+                'student_id': cell.dataset.studentId,
+                'date': cell.dataset.date,
+            });
+
+            if (currentStatus === '' || currentStatus === 'N/A') {
+                body.set('status', 'present');
+            } else if (currentStatus === '+') {
+                body.set('status', 'absent');
+            } else if (currentStatus === '-') {
+                const partialData = prompt("Qoldirilgan darslar sonini '1/4' formatida kiriting:", "1/4");
+                if (partialData && partialData.includes('/')) {
+                    const [missed, total] = partialData.split('/');
+                    if (missed && total && !isNaN(missed) && !isNaN(total)) {
+                        body.set('status', 'partial');
+                        body.set('missed_lessons', missed.trim());
+                        body.set('total_lessons', total.trim());
+                    } else { return; }
+                } else { return; }
+            } else { // Agar '1/4' kabi yozuv bo'lsa, bosilganda o'chiradi
+                body.set('status', 'delete');
+            }
+
+            fetch(`/tests/ajax/update-attendance/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+                body: body
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const allCells = document.querySelectorAll(`.day-cell[data-student-id="${cell.dataset.studentId}"][data-date="${cell.dataset.date}"]`);
+                    allCells.forEach(c => {
+                        const newStatus = data.display_status;
+                        const strongTag = c.querySelector('strong');
+                        if (strongTag) { strongTag.textContent = newStatus || 'N/A'; } 
+                        else { c.textContent = newStatus; }
+                        
+                        c.className = c.className.replace(/status-\w+/g, '').trim();
+                        if (newStatus === '+') { c.classList.add('status-present'); if(strongTag) strongTag.className = 'text-success fw-bold';}
+                        else if (newStatus === '-') { c.classList.add('status-absent'); if(strongTag) strongTag.className = 'text-danger fw-bold';}
+                        else if (newStatus.includes('/')) { c.classList.add('status-partial'); if(strongTag) strongTag.className = 'text-warning fw-bold';}
+                        else { if(strongTag) strongTag.className = 'text-muted';}
+                    });
+                }
+            });
+        }
+    });
+
+    if (groupSelect.value) {
+        resetAndFetch();
+    }
+});
+</script>
+{% endblock %}

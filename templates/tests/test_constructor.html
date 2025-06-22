@@ -1,0 +1,69 @@
+{% extends 'base_dashboard.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1>{{ title }}</h1>
+    {% if test.pk %}
+        <p class="text-muted">Test ID: {{ test.pk }}</p>
+    {% endif %}
+</div>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="card mb-4">
+        <div class="card-header">Asosiy ma'lumotlar</div>
+        <div class="card-body">
+            {{ form.as_p }}
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-header">Savollar</div>
+        <div class="card-body" id="question-forms-container">
+            {{ question_formset.management_form }}
+            {% for q_form in question_formset %}
+            <div class="question-form">
+                {{ q_form.id }}
+                <div class="d-flex justify-content-between">
+                    <label for="{{ q_form.question_text.id_for_label }}" class="form-label fw-bold">Savol</label>
+                    {% if q_form.can_delete %}<div class="form-check">{{ q_form.DELETE }} <label>O'chirish</label></div>{% endif %}
+                </div>
+                {{ q_form.question_text }}
+                <div class="answer-options mt-3">
+                    <h6 class="small">Javob variantlari:</h6>
+                    {{ q_form.answer_formset.management_form }}
+                    {% for a_form in q_form.answer_formset %}
+                    <div class="answer-form">
+                        {{ a_form.id }}
+                        {{ a_form.answer_text }}
+                        <div class="form-check form-check-inline">{{ a_form.is_correct }} <label>To'g'ri</label></div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <button type="submit" name="action" value="save_test" class="btn-edit">Testni Saqlash</button>
+</form>
+
+<hr class="my-5">
+
+{% if test.pk %}
+<div class="card">
+    <div class="card-header">Savollarni fayldan import qilish</div>
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ import_form.as_p }}
+            <button type="submit" name="action" value="import_questions" class="btn-edit" style="background-color: #17a2b8;">Import qilish</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}

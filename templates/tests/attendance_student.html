@@ -1,0 +1,58 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Mening Davomatim{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1 class="h2">Mening Davomatim</h1>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div class="week-navigation">
+            <a href="{{ request.path }}{{ prev_month_url_params }}" class="btn-edit">&larr; Oldingi oy</a>
+            <h5 class="mb-0">{{ current_month_str }}</h5>
+            <a href="{{ request.path }}{{ next_month_url_params }}" class="btn-edit">Keyingi oy &rarr;</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive-wrapper">
+            <table class="calendar-table">
+                <thead>
+                    <tr>
+                        <th>Du</th><th>Se</th><th>Cho</th><th>Pay</th><th>Ju</th><th>Sha</th><th>Yak</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in month_weeks %}
+                    <tr>
+                        {% for day in week %}
+                            <td class="{% if day.month != current_month_num %}other-month{% endif %} {% if day.weekday == 6 %}weekend{% endif %}">
+                                <div class="day-number">{{ day.day }}</div>
+                                {% for key, record in attendance_map.items %}
+                                    {% if key == day %}
+                                        <span 
+                                            class="status-dot 
+                                            {% if record.status == 'present' %}status-dot-present{% endif %}
+                                            {% if record.status == 'absent' %}status-dot-absent{% endif %}
+                                            {% if record.status == 'partial' %}status-dot-partial{% endif %}"
+                                            title="Holat: {{ record.get_status_display }} {% if record.status == 'partial' %}({{ record }}){% endif %}"
+                                        ></span>
+                                    {% endif %}
+                                {% endfor %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="d-flex justify-content-center align-items-center mt-4 pt-3 border-top gap-4">
+            <div><span class="legend-dot legend-dot-present"></span> Keldi</div>
+            <div><span class="legend-dot legend-dot-absent"></span> Kelmadi</div>
+            <div><span class="legend-dot legend-dot-partial"></span> Kechikdi</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Testlar Ro'yxati{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Mavjud Testlar</h1>
+</div>
+
+<div class="row">
+    {% if test_data %}
+        {% for data in test_data %}
+        <div class="col-md-6 col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ data.test.title }}</h5>
+                    <p class="card-text text-muted">Guruh: {{ data.test.group.name }}</p>
+                    <ul class="list-unstyled mt-3 mb-4">
+                        <li><i class="fas fa-question-circle me-2 text-primary"></i> Savollar soni: {{ data.test.num_questions }}</li>
+                        <li><i class="fas fa-clock me-2 text-primary"></i> Ochilish vaqti: {{ data.test.open_time|date:"d.m.Y H:i" }}</li>
+                    </ul>
+                    <div class="mt-auto">
+                        {% if data.test.is_active and not data.has_taken %}
+                            <a href="{% url 'tests:take_test' data.test.id %}" class="btn btn-primary w-100">Testni boshlash</a>
+                        {% elif data.has_taken %}
+                             <p><strong>Siz bu testni topshirgansiz.</strong> <a href="{% url 'tests:test_result_detail' data.result_id %}">Natijani ko'rish</a></p>
+                        {% elif data.test.is_upcoming %}
+                            <button class="btn btn-secondary w-100" disabled>Hali boshlanmadi</button>
+                        {% elif data.test.is_finished %}
+                            <button class="btn btn-danger w-100" disabled>Vaqti tugagan</button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card p-5 text-center">
+                <p class="h5">Sizning guruhingiz uchun hozircha testlar mavjud emas.</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

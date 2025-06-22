@@ -1,0 +1,74 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Mening Profilim{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="content-header">
+    <h1>Mening Profilim</h1>
+</div>
+
+<div class="card">
+    <div class="card-body profile-card-unified">
+
+        <div class="profile-sidebar">
+            {% if student_profile.profile_picture %}
+                <img src="{{ student_profile.profile_picture.url }}" alt="Profil rasmi" class="rounded-circle mb-3" style="width:180px; height:180px; object-fit:cover;">
+            {% else %}
+                <img src="{% static 'images/default_profile.png' %}" alt="Default rasm" class="rounded-circle mb-3" style="width:180px; height:180px;">
+            {% endif %}
+            
+            <h4 class="mb-1" style="font-weight: 700; color: var(--heading-color);">{{ student_profile.full_name }}</h4>
+            <p class="text-muted mb-3">ID: {{ student_profile.student_id|default:student_profile.username }}</p>
+
+
+        </div>
+
+        <div class="profile-content">
+            <h5 style="color: var(--heading-color); border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-bottom: 20px;">Batafsil ma'lumotlar</h5>
+            <div class="details-grid">
+                <div>
+                    <p class="mb-0"><strong>Foydalanuvchi:</strong></p>
+                    <p class="text-muted">{{ student_profile.get_rol_display }}</p>
+                </div>
+                <div>
+                    <p class="mb-0"><strong>Guruh:</strong></p>
+                    <p class="text-muted">{{ student_profile.group.name|default:"Biriktirilmagan" }}</p>
+                </div>
+                <div>
+                    <p class="mb-0"><strong>Tug'ilgan sana:</strong></p>
+                    <p class="text-muted">{{ student_profile.date_of_birth|date:"d F Y" }}</p>
+                </div>
+                <div>
+                    <p class="mb-0"><strong>Pasport raqami:</strong></p>
+                    <p class="text-muted">{{ student_profile.passport_number }}</p>
+                </div>
+                <div>
+                    <p class="mb-0"><strong>Telefon raqami:</strong></p>
+                    <p class="text-muted">{{ student_profile.phone_number }}</p>
+                </div>
+                <div>
+                    <p class="mb-0"><strong>Manzil:</strong></p>
+                    <p class="text-muted">{{ student_profile.address }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div class="card">
+     <div class="card-header">
+        Topshirilgan test natijalari
+     </div>
+     <div class="card-body">
+        {% if student_results %}
+            <p>Sizning test natijalaringiz shu yerda ko'rsatiladi.</p>
+        {% else %}
+            <p>Siz hali birorta ham test topshirmagansiz.</p>
+        {% endif %}
+     </div>
+</div>
+
+{% endblock %}

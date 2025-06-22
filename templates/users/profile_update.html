@@ -1,0 +1,35 @@
+{% extends 'base_dashboard.html' %}
+
+{% block page_title %}Profilni Tahrirlash{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1>Profilni Tahrirlash</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {% if field.name == 'profile_picture' and form.instance.profile_picture %}
+                        <p class="mt-2">Hozirgi rasm: <a href="{{ form.instance.profile_picture.url }}" target="_blank">Ko'rish</a></p>
+                    {% endif %}
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="form-text text-muted">{{ field.help_text }}</small>
+                    {% endif %}
+                </div>
+            {% endfor %}
+            
+            <div class="btn-group">
+                <button type="submit" class="btn-edit">Saqlash</button>
+                <a href="{% url 'profile' %}" class="btn-edit" style="background-color: #6c757d;">Bekor qilish</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

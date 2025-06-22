@@ -1,0 +1,50 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="h2">{{ title }}</h1>
+        <a href="{% url 'admin:tests_testschedule_change' test_schedule.id %}" class="btn-edit" style="background-color: #6c757d;">
+            <i class="fas fa-arrow-left me-2"></i> Testga qaytish
+        </a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <p class="card-text">
+            Bu yerda siz test uchun savollarni Word (.docx), Excel (.xlsx, .xls) yoki CSV (.csv) fayllaridan yuklashingiz mumkin.
+        </p>
+        <p class="card-text">
+            <strong>Eslatma:</strong> Fayl tuzilishi belgilangan formatga mos bo'lishi kerak. Namuna sifatida siz yuborgan Word faylidagi kabi tuzilishdan foydalaning.
+        </p>
+        
+        <hr>
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label for="{{ form.file.id_for_label }}" class="form-label"><strong>{{ form.file.label }}</strong></label>
+                {{ form.file }}
+                {% if form.file.help_text %}
+                    <div class="form-text text-muted mt-2">{{ form.file.help_text }}</div>
+                {% endif %}
+                {% for error in form.file.errors %}
+                    <div class="alert alert-danger mt-2">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn-edit">
+                    <i class="fas fa-upload me-2"></i> Yuklash va Import qilish
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}
