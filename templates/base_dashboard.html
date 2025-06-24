@@ -29,13 +29,22 @@
                          {% endif %}
                     {% endif %}
                     <li><a href="{% url 'tests:timetable' %}" class="{% if active_page == 'dars_jadvali' %}active{% endif %}"><i class="fas fa-calendar-alt fa-fw"></i> Dars Jadvali</a></li>
-                    <li><a href="{% url 'profile' %}" class="{% if active_page == 'profil' %}active{% endif %}"><i class="fas fa-user-circle fa-fw"></i> Mening profilim</a></li>
+                    <li>
+            <a href="{% url 'users:notification_list' %}" class="{% if active_page == 'bildirishnomalar' %}active{% endif %}">
+                <i class="fas fa-bell fa-fw"></i>
+                <span>Bildirishnomalar</span>
+                {% if unread_notifications_count > 0 %}
+                    <span class="badge bg-danger ms-auto">{{ unread_notifications_count }}</span>
+                {% endif %}
+            </a>
+        </li>
+                    <li><a href="{% url 'users:profile' %}" class="{% if active_page == 'profil' %}active{% endif %}"><i class="fas fa-user-circle fa-fw"></i> Mening profilim</a></li>
                 </ul>
             </nav>
             <div class="sidebar-footer">
                  <nav class="sidebar-nav">
                     <ul>
-                        <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt fa-fw"></i> Chiqish</a></li>
+                        <li><a href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt fa-fw"></i> Chiqish</a></li>
                     </ul>
                 </nav>
             </div>

@@ -7,9 +7,9 @@ from django.contrib.auth.decorators import login_required # Kirish talab qilinad
 from django.contrib import messages # Xabarnomalar uchun
 from .forms import StudentRegistrationForm # Keyinroq yaratiladigan custom ro'yxatdan o'tish formasi uchun
 from .models import StudentProfile # StudentProfile modelimiz uchun
-from tests.models import TestResult, Bildirishnoma
+from tests.models import TestResult
 from .forms import ProfileUpdateForm 
-
+from tests.models import Bildirishnoma
 
 # Foydalanuvchini ro'yxatdan o'tkazish view'i
 def register_view(request):
@@ -17,14 +17,21 @@ def register_view(request):
         form = StudentRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-            parol = form.cleaned_data.get('password')
-            matn = f"Salom {user.full_name}, bu sizning ID raqamingiz: {user.student_id}, va parolingiz: {parol}. Bularni unutmang!"
-            Bildirishnoma.objects.create(user=user, matn=matn)
+            try:
+                message_text = (f"Hurmatli {user.full_name}, tizimdan muvaffaqiyatli ro'yxatdan o'tdingiz!\n\n"
+                                f"Sizning ID raqamingiz: {user.student_id}\n"
+                                f"Login uchun ismingiz: {user.username}\n\n"
+                                f"Parol: (Siz ro'yxatdan o'tishda o'zingiz kiritgan parol)")
+
+                # ### TUZATISH: Maydon nomi 'matn' ga o'zgartirildi ###
+                Bildirishnoma.objects.create(user=user, matn=message_text)
+
+            except Exception as e:
+                print(f"Bildirishnoma yaratishda xatolik: {e}")
+
             login(request, user)
-            messages.success(request, f"Ro'yxatdan muvaffaqiyatli o'tdingiz! Sizning ID raqamingiz: {user.student_id}")
-            return redirect('tests:test_list')
-        else:
-            messages.error(request, "Iltimos, quyidagi xatolarni to'g'rilang.")
+            messages.success(request, "Siz muvaffaqiyatli ro'yxatdan o'tdingiz!")
+            return redirect('users:profile')
     else:
         form = StudentRegistrationForm()
     return render(request, 'users/register.html', {'form': form})
@@ -70,7 +77,7 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     messages.info(request, "Tizimdan muvaffaqiyatli chiqdingiz.")
-    return redirect('login')
+    return redirect('users:login')
 
 @login_required
 def profile_view(request):
@@ -89,3 +96,17 @@ def home_view(request):
     # Bu yerda siz foydalanuvchi tizimga kirgandan keyin ko'radigan ma'lumotlarni joylashtirishingiz mumkin.
     # Masalan, testlar ro'yxatiga yo'naltirish:
     return redirect('tests:test_list')
+
+@login_required
+def notification_list_view(request):
+    notifications = Bildirishnoma.objects.filter(user=request.user).order_by('-created_at')
+    
+    # O'qilmagan bildirishnomalarni "o'qilgan" deb belgilash
+    unread_notifications = notifications.filter(is_read=False)
+    unread_notifications.update(is_read=True)
+    
+    context = {
+        'notifications': notifications,
+        'active_page': 'bildirishnomalar',
+    }
+    return render(request, 'tests/notification_list.html', context)

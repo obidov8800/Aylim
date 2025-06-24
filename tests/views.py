@@ -646,3 +646,17 @@ def update_attendance_view(request):
         return JsonResponse({'success': True, 'display_status': str(record)})
         
     return JsonResponse({'success': False})
+
+@login_required
+def notification_list_view(request):
+    # ### TUZATISH: Maydon nomi 'yaratilgan_sana' ga o'zgartirildi ###
+    notifications = Bildirishnoma.objects.filter(user=request.user).order_by('-yaratilgan_sana')
+    
+    unread_notifications = notifications.filter(is_read=False)
+    unread_notifications.update(is_read=True)
+    
+    context = {
+        'notifications': notifications,
+        'active_page': 'bildirishnomalar',
+    }
+    return render(request, 'tests/notification_list.html', context)

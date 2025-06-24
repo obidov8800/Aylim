@@ -40,7 +40,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'aylim_system.context_processors.notifications_context',
+                'aylim_system.context_processors.notifications',
             ],
         },
     },
@@ -78,5 +78,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.StudentProfile'
 LOGIN_URL = 'login'
-LOGOUT_REDIRECT_URL = 'login'
+LOGOUT_REDIRECT_URL = 'users:login'
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000

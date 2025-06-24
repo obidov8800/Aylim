@@ -2,7 +2,7 @@
 
 from django import forms
 from .models import StudentProfile # Faqat StudentProfile modelini import qilamiz!
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from tests.models import Group
 
 class StudentRegistrationForm(forms.ModelForm):
@@ -23,21 +23,19 @@ class StudentRegistrationForm(forms.ModelForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+        # ID va username yaratish logikasi
         last_student = StudentProfile.objects.filter(student_id__startswith='S').order_by('student_id').last()
         if last_student and last_student.student_id:
             new_id_num = int(last_student.student_id[1:]) + 1
         else:
             new_id_num = 1
-        
-        new_student_id = f"S{new_id_num:04d}"
-        user.student_id = new_student_id
-        user.username = new_student_id
+        user.student_id = f"S{new_id_num:04d}"
+        user.username = user.student_id # username ham student_id bo'lsin
         user.set_password(self.cleaned_data["password"])
         
         if commit:
             user.save()
         return user
-
 
     
 class CustomUserAdminCreationForm(forms.ModelForm):
@@ -90,7 +88,7 @@ class CustomUserAdminCreationForm(forms.ModelForm):
         return user
 
 # Tahrirlash formasi o'zgarishsiz qoladi
-class CustomUserChangeForm(forms.ModelForm):
+class CustomUserAdminChangeForm(UserChangeForm):
     class Meta:
         model = StudentProfile
         fields = '__all__'
@@ -105,3 +103,10 @@ class ProfileUpdateForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
+
+class BroadcastNotificationForm(forms.Form):
+    message_text = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 6, 'class': 'vLargeTextField'}), 
+        label="Xabar matni",
+        help_text="Ushbu xabar tanlangan barcha foydalanuvchilarga yuboriladi."
+    )

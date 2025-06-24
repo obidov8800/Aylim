@@ -1,8 +1,8 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import StudentProfile
-from .forms import CustomUserAdminCreationForm 
-
+from .forms import (CustomUserAdminCreationForm, CustomUserAdminChangeForm, BroadcastNotificationForm)
+from tests.models import Bildirishnoma
 # UserAdmin ni kengaytiramiz, chunki StudentProfile AbstractUser dan meros olgan
 class StudentProfileAdmin(UserAdmin):
     # Foydalanuvchini TAHRIRLASH sahifasi uchun maydonlarni to'liq qayta yozamiz
@@ -36,3 +36,25 @@ class StudentProfileAdmin(UserAdmin):
 
 # Modelni admin paneliga ro'yxatdan o'tkazamiz
 admin.site.register(StudentProfile, StudentProfileAdmin)
+
+@admin.action(description="Tanlangan foydalanuvchilarga bildirishnoma yuborish")
+def send_notification_action(modeladmin, request, queryset):
+    if 'apply' in request.POST:
+        form = BroadcastNotificationForm(request.POST)
+        if form.is_valid():
+            message = form.cleaned_data['message_text']
+            count = 0
+            for user in queryset:
+                # ### TUZATISH: Maydon nomi 'matn' ga o'zgartirildi ###
+                Bildirishnoma.objects.create(user=user, matn=message)
+                count += 1
+            modeladmin.message_user(request, f"{count} ta foydalanuvchiga bildirishnoma muvaffaqiyatli yuborildi.")
+            return redirect(request.get_full_path())
+    else:
+        form = BroadcastNotificationForm()
+
+    return render(request, 'admin/send_notification_form.html', {
+        'title': 'Bildirishnoma yuborish',
+        'items': queryset,
+        'form': form,
+    })
