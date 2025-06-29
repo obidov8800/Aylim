@@ -18,7 +18,10 @@ class StudentProfile(AbstractUser):
 
     rol = models.CharField(max_length=50, choices=Role.choices, default=Role.TALABA, verbose_name="Roli")
     student_id = models.CharField(max_length=10, unique=True, null=True, blank=True, editable=False, verbose_name="Talabalik ID")
-    
+    telegram_id = models.BigIntegerField(unique=True, null=True, blank=True, verbose_name="Telegram ID")
+    telegram_verification_code = models.CharField(max_length=10, null=True, blank=True, verbose_name="Telegram uchun tasdiq kodi")
+    password_reset_code = models.CharField(max_length=10, null=True, blank=True, verbose_name="Parolni tiklash kodi")
+
     full_name = models.CharField(max_length=255, verbose_name="To'liq ism (F.I.Sh.)")
     date_of_birth = models.DateField(verbose_name="Tug'ilgan sana", null=True, blank=True)
     passport_number = models.CharField(max_length=9, unique=True, validators=[validate_passport_number], verbose_name='Pasport raqami')

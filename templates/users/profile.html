@@ -20,7 +20,20 @@
                 {% endif %}
                 <h5 class="mb-1 fw-bold">{{ request.user.full_name }}</h5>
                 <p class="text-muted mb-2">ID: {{ request.user.student_id|default:request.user.username }}</p>
-
+{# Telegram uchun tasdiqlash kodi bloki #}
+{% if user.telegram_verification_code %}
+    <div class="card mb-4 border-primary shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <i class="fas fa-robot mr-2"></i> Telegram Botni Ulash
+        </div>
+        <div class="card-body text-center">
+            <p class="card-text">Telegram botga hisobingizni ulash uchun quyidagi tasdiqlash kodini kiriting:</p>
+            <h2 class="font-weight-bold text-primary display-4" style="letter-spacing: 5px;">{{ user.telegram_verification_code }}</h2>
+            <small class="text-muted">Ushbu kod bir martalik. Botga kiritganingizdan so'ng o'chib ketadi.</small>
+        </div>
+    </div>
+{% endif %}
+{# /Telegram uchun tasdiqlash kodi bloki #}
             </div>
             <div class="col-md-9">
                 <hr class="d-md-none my-3">

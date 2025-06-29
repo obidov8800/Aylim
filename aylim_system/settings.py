@@ -15,6 +15,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'users',
     'tests',
+    'bot',
 ]
 
 MIDDLEWARE = [
@@ -50,8 +51,12 @@ WSGI_APPLICATION = 'aylim_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',       # yoki agar boshqa baza yaratsang, o‘shani
+        'USER': 'postgres',
+        'PASSWORD': 'aylimpass',  # aynan yuqorida kiritgan parol
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -77,6 +82,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.StudentProfile'
-LOGIN_URL = 'login'
+LOGIN_URL = 'users:login'
 LOGOUT_REDIRECT_URL = 'users:login'
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 3000
