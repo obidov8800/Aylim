@@ -1,0 +1,117 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Mening Profilim{% endblock %}
+
+{% block dashboard_content %}
+
+<div class="page-header mb-4">
+    <h1 class="h2">Mening Profilim</h1>
+    {# Bu yerga "Profilni tahrirlash" kabi tugma qo'yishingiz mumkin #}
+    {# <a href="{% url 'users:profile_update' %}" class="btn btn-outline-primary btn-sm">Tahrirlash</a> #}
+</div>
+
+{# Telegram uchun maxsus bildirishnoma bloki #}
+{% if user.telegram_verification_code or user.password_reset_code %}
+<div class="alert alert-info shadow-sm" role="alert">
+    <h4 class="alert-heading"><i class="fas fa-robot me-2"></i>Telegram Bot Amali</h4>
+    <p>Botdagi jarayonni yakunlash uchun quyidagi maxfiy koddan foydalaning:</p>
+    <hr>
+    <p class="text-center display-4 fw-bold text-primary mb-0" style="letter-spacing: 0.2em;">
+        {{ user.telegram_verification_code|default:user.password_reset_code }}
+    </p>
+</div>
+{% endif %}
+
+
+{# Asosiy profil kartasi #}
+<div class="card profile-card shadow-sm">
+    <div class="card-body">
+        {# Kartaning sarlavha qismi #}
+        <div class="d-flex align-items-center mb-4">
+            <img src="{{ user.profile_picture.url }}" alt="Profil rasmi" class="profile-avatar me-3">
+            <div>
+                <h4 class="card-title mb-0">{{ user.full_name }}</h4>
+                <p class="text-muted mb-0">ID: {{ user.username }}</p>
+            </div>
+        </div>
+
+        <hr>
+
+        {# Batafsil ma'lumotlar qismi #}
+        <h5 class="mb-3">Batafsil ma'lumotlar</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <dl class="profile-details-list">
+                    <dt>Foydalanuvchi:</dt>
+                    <dd>{{ user.get_rol_display }}</dd>
+
+                    <dt>Tug'ilgan sana:</dt>
+                    <dd>{{ user.date_of_birth|date:"d F Y" }}</dd>
+
+                    <dt>Telefon raqami:</dt>
+                    <dd>{{ user.phone_number }}</dd>
+                </dl>
+            </div>
+            <div class="col-md-6">
+                <dl class="profile-details-list">
+                    <dt>Guruh:</dt>
+                    <dd>{{ user.group.name|default:"Biriktirilmagan" }}</dd>
+
+                    <dt>Pasport raqami:</dt>
+                    <dd>{{ user.passport_number }}</dd>
+
+                    <dt>Manzil:</dt>
+                    <dd>{{ user.address|default:"Kiritilmagan" }}</dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{# Topshirilgan test natijalari kartasi #}
+<div class="card shadow-sm mt-4">
+    <div class="card-header bg-light fw-bold">
+        Topshirilgan test natijalari
+    </div>
+    <div class="card-body p-0">
+        {% if student_results %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="ps-3">Test Sarlavhasi</th>
+                            <th scope="col">Ball</th>
+                            <th scope="col">Baho</th>
+                            <th scope="col">Topshirilgan Vaqt</th>
+                            <th scope="col" class="pe-3 text-end">Amallar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in student_results %}
+                        <tr>
+                            <td class="ps-3 fw-medium">{{ result.test.title }}</td>
+                            <td><strong class="text-primary">{{ result.score|floatformat:2 }}</strong></td>
+                            <td><span class="badge" style="background-color: {{ result.grade_color|default:'#6c757d' }};">{{ result.grade }}</span></td>
+                            <td>{{ result.completion_time|date:"d.m.Y H:i" }}</td>
+                            <td class="pe-3 text-end">
+                                <a href="{% url 'tests:test_result_detail' result.id %}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-eye me-1"></i> Batafsil
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <p class="mb-0 text-muted">Siz hali birorta ham test topshirmagansiz.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

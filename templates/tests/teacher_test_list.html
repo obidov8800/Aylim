@@ -1,0 +1,55 @@
+{% extends 'base_dashboard.html' %}
+{% block page_title %}Mening Testlarim{% endblock %}
+
+{% block dashboard_content %}
+<div class="page-header">
+    <h1 class="h2">Mening Testlarim</h1>
+    <a href="{% url 'tests:create_test' %}" class="btn-edit">
+        <i class="fas fa-plus me-2"></i> Yangi test yaratish
+    </a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Sarlavha</th>
+                        <th>Guruh</th>
+                        <th>Ochilish Vaqti</th>
+                        <th>Yopilish Vaqti</th>
+                        <th>Amallar</th>
+                    </tr>
+                </thead>
+<tbody>
+    {% for test in tests %}
+    <tr>
+        <td>{{ test.title }}</td>
+        <td>{{ test.group.name }}</td>
+        <td>{{ test.open_time|date:"d.m.Y H:i" }}</td>
+        <td>{{ test.close_time|date:"d.m.Y H:i" }}</td>
+        
+        <td class="actions-cell">
+            <a href="{% url 'tests:import_questions' test.id %}" class="action-btn btn-import" title="Savol import qilish">
+                <i class="fas fa-file-import"></i> <span>Import</span>
+            </a>
+            <a href="{% url 'tests:edit_test' test.id %}" class="action-btn btn-edit-action" title="Tahrirlash">
+                <i class="fas fa-edit"></i> <span>Tahrirlash</span>
+            </a>
+            <a href="{% url 'tests:delete_test' test.id %}" class="action-btn btn-delete" title="O'chirish">
+                <i class="fas fa-trash"></i> <span>O'chirish</span>
+            </a>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="5" class="text-center">Siz hali test yaratmagansiz.</td>
+    </tr>
+    {% endfor %}
+</tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

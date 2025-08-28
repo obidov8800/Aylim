@@ -1,0 +1,52 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}{{ test.title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0">{{ test.title }}</h1>
+        <p class="text-muted mb-0">{{ test.group.name }} guruhi uchun</p>
+    </div>
+</div>
+
+<form method="post" id="test-form">
+    {% csrf_token %}
+    
+    {% for question in questions %}
+        <div class="card mb-3 question-card" data-question-id="{{ question.id }}">
+            <div class="card-header fw-bold">
+                {{ forloop.counter }}. Savol
+            </div>
+            <div class="card-body">
+                <p class="lead">{{ question.question_text }}</p>
+                <hr>
+                <div class="options-container mt-3">
+                    
+                    {# ### XATO TO'LIQ TUZATILDI ### #}
+                    {# Har bir variant uchun 'radio' turidagi input to'g'ri nom bilan yaratiladi #}
+                    {% for option in question.answer_options.all %}
+                        <div class="form-check mb-2">
+                            <input class="form-check-input" 
+                                   type="radio" 
+                                   name="question_{{ question.id }}"  {# Bitta savol uchun barcha variantlarda 'name' bir xil #}
+                                   id="option_{{ option.id }}" 
+                                   value="{{ option.id }}"
+                                   required> {# Javob berishni majburiy qilish uchun #}
+                            <label class="form-check-label" for="option_{{ option.id }}">
+                                {{ option.answer_text }}
+                            </label>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary btn-lg w-100">Testni Yakunlash va Natijani Ko'rish</button>
+    </div>
+</form>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Testlar Ro'yxati{% endblock %}
+
+{% block dashboard_content %}
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">Mavjud Testlar</h1>
+</div>
+
+<div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+    {% for data in test_data %}
+    <div class="col">
+        <div class="card h-100 shadow-sm test-card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold text-primary">{{ data.test.title }}</h5>
+                <p class="card-subtitle mb-2 text-muted">{{ data.test.group.name }} guruhi uchun</p>
+                <hr>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-layer-group fa-fw me-2 text-secondary"></i>
+                        Savollar soni: <strong>{{ data.test.num_questions }} ta</strong>
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-calendar-alt fa-fw me-2 text-secondary"></i>
+                        Ochilish vaqti: <strong>{{ data.test.open_time|date:"d.m.Y H:i" }}</strong>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-footer bg-light border-0 p-3">
+                {% if data.test.is_active and not data.has_taken %}
+                    <a href="{% url 'tests:take_test' data.test.id %}" class="btn btn-success w-100 fw-bold">
+                        <i class="fas fa-play-circle me-2"></i> Testni Boshlash
+                    </a>
+                {% elif data.has_taken %}
+                    <div class="alert alert-info mb-0 text-center py-2">
+                        <i class="fas fa-check-circle me-1"></i>
+                        <strong>Test topshirilgan.</strong><br>
+                        <a href="{% url 'tests:test_result_detail' data.result_id %}" class="alert-link">Natijani ko'rish</a>
+                    </div>
+                {% elif data.test.is_upcoming %}
+                    <button class="btn btn-secondary w-100" disabled>
+                        <i class="fas fa-lock me-2"></i> Hali boshlanmadi
+                    </button>
+                {% elif data.test.is_finished %}
+                     <button class="btn btn-danger w-100" disabled>
+                        <i class="fas fa-times-circle me-2"></i> Vaqti tugagan
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="card p-5 text-center border-2 border-dashed">
+            <div class="card-body">
+                <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                <p class="h5 text-muted">Sizning guruhingiz uchun hozircha testlar mavjud emas.</p>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

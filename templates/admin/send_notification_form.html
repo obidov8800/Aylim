@@ -1,0 +1,29 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block content %}
+<div id="content-main">
+    <form method="post">
+        {% csrf_token %}
+        <h2>{{ title }}</h2>
+        <p>Siz quyidagi {{ items.count }} ta foydalanuvchiga bildirishnoma yubormoqdasiz:</p>
+        <ul>
+            {% for item in items %}
+            <li>{{ item.full_name }} ({{ item.username }})</li>
+            {% endfor %}
+        </ul>
+        <fieldset class="module aligned">
+            <div class="form-row">
+                {{ form.message_text.label_tag }}
+                {{ form.message_text }}
+                {% if form.message_text.help_text %}
+                <div class="help">{{ form.message_text.help_text }}</div>
+                {% endif %}
+            </div>
+        </fieldset>
+        <div class="submit-row">
+            <input type="hidden" name="action" value="send_notification_action">
+            <input type="submit" name="apply" value="Yuborish" class="default">
+        </div>
+    </form>
+</div>
+{% endblock %}

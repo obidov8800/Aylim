@@ -1,0 +1,152 @@
+{% extends 'base_dashboard.html' %}
+
+{% block page_title %}{{ title }}{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2">{{ title }}</h1>
+</div>
+
+<form method="post" id="test-constructor-form">
+    {% csrf_token %}
+
+    <div class="card mb-4">
+        <div class="card-header fw-bold">Asosiy ma'lumotlar</div>
+        <div class="card-body">
+            {% if form.non_field_errors %}<div class="alert alert-danger">{{ form.non_field_errors }}</div>{% endif %}
+            <div class="row">
+                {% for field in form %}
+                <div class="col-md-6 mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}<div class="form-text text-muted small">{{ field.help_text }}</div>{% endif %}
+                    {% if field.errors %}<div class="alert alert-danger p-1 mt-1 small">{{ field.errors|first }}</div>{% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    {% if test.pk %}
+    <div class="card mb-4">
+        <div class="card-header fw-bold d-flex justify-content-between align-items-center">
+            <span>Savollar</span>
+            <a href="{% url 'tests:import_questions' test.id %}" class="btn btn-sm btn-outline-info">
+                <i class="fas fa-file-import me-1"></i> Fayldan Import
+            </a>
+        </div>
+        <div class="card-body">
+            {{ question_formset.management_form }}
+            {% if question_formset.non_form_errors %}<div class="alert alert-danger">{{ question_formset.non_form_errors }}</div>{% endif %}
+
+            <div id="question-forms-container">
+                {% for q_form in question_formset %}
+                <div class="question-block p-3 border rounded mb-3 {% if forloop.counter|divisibleby:2 %}bg-light{% else %}bg-white{% endif %}">
+                    {{ q_form.id }}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label fw-bold">Savol #{{ forloop.counter }}</label>
+                        {% if q_form.instance.pk and question_formset.can_delete %}
+                        <div class="form-check form-switch">
+                            {{ q_form.DELETE }} <label for="{{ q_form.DELETE.id_for_label }}">O'chirish</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                    {{ q_form.question_text }}
+                    {% if q_form.errors %}<div class="alert alert-danger p-1 small mt-1">{{ q_form.errors }}</div>{% endif %}
+                    
+                    <hr>
+                    <h6 class="small fw-bold">Javob variantlari (bittasini to'g'ri deb belgilang):</h6>
+                    
+                    {% with q_form.answer_formset as answer_formset %}
+                        {{ answer_formset.management_form }}
+                        {% if answer_formset.non_form_errors %}<div class="alert alert-danger p-1 small">{{ answer_formset.non_form_errors }}</div>{% endif %}
+                        <div class="row gx-2">
+                            {% for a_form in answer_formset %}
+                                <div class="col-md-6">
+                                    <div class="input-group input-group-sm mb-2">
+                                        <div class="input-group-text">
+                                            {{ a_form.is_correct }}
+                                        </div>
+                                        {{ a_form.answer_text }}
+                                        {{ a_form.id }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endwith %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <button type="button" id="add-question-btn" class="btn btn-sm btn-success mt-2">
+                <i class="fas fa-plus"></i> Yana savol qo'shish
+            </button>
+        </div>
+    </div>
+    {% endif %}
+    
+    <button type="submit" class="btn btn-primary btn-lg w-100 mt-2">
+        <i class="fas fa-save me-2"></i>
+        {% if test %}O'zgarishlarni Saqlash{% else %}Test Yaratish va Savollarga O'tish{% endif %}
+    </button>
+</form>
+
+<div id="empty-question-form" style="display: none;">
+    <div class="question-block p-3 border rounded mb-3 bg-white">
+        __FORM_HTML__
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const addQuestionBtn = document.getElementById('add-question-btn');
+    if (addQuestionBtn) {
+        addQuestionBtn.addEventListener('click', function () {
+            const formContainer = document.getElementById('question-forms-container');
+            const totalFormsInput = document.getElementById('id_questions-TOTAL_FORMS');
+            const formIndex = parseInt(totalFormsInput.value);
+            
+            // Andoza sifatida ishlatish uchun formsetning bo'sh formasini olamiz
+            // Django uni `__prefix__` bilan yaratadi
+            const emptyFormHtml = `
+            <input type="hidden" name="questions-${formIndex}-id" id="id_questions-${formIndex}-id">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-bold">Yangi Savol</label>
+                <div class="form-check form-switch">
+                    <input type="checkbox" name="questions-${formIndex}-DELETE" id="id_questions-${formIndex}-DELETE">
+                    <label for="id_questions-${formIndex}-DELETE">O'chirish</label>
+                </div>
+            </div>
+            <textarea name="questions-${formIndex}-question_text" class="form-control" rows="2" placeholder="Yangi savol matnini shu yerga yozing" id="id_questions-${formIndex}-question_text"></textarea>
+            <hr>
+            <h6 class="small fw-bold">Javob variantlari:</h6>
+            
+            <input type="hidden" name="answers_new_questions-${formIndex}-TOTAL_FORMS" value="4" id="id_answers_new_questions-${formIndex}-TOTAL_FORMS">
+            <input type="hidden" name="answers_new_questions-${formIndex}-INITIAL_FORMS" value="0" id="id_answers_new_questions-${formIndex}-INITIAL_FORMS">
+            <input type="hidden" name="answers_new_questions-${formIndex}-MAX_NUM_FORMS" value="4" id="id_answers_new_questions-${formIndex}-MAX_NUM_FORMS">
+            <div class="row gx-2">
+                ${[0, 1, 2, 3].map(i => `
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm mb-2">
+                        <div class="input-group-text">
+                            <input type="checkbox" name="answers_new_questions-${formIndex}-${i}-is_correct" id="id_answers_new_questions-${formIndex}-${i}-is_correct">
+                        </div>
+                        <input type="text" name="answers_new_questions-${formIndex}-${i}-answer_text" class="form-control form-control-sm" placeholder="Javob varianti" id="id_answers_new_questions-${formIndex}-${i}-answer_text">
+                    </div>
+                </div>
+                `).join('')}
+            </div>
+            `;
+            
+            const newFormDiv = document.createElement('div');
+            newFormDiv.classList.add('question-block', 'p-3', 'border', 'rounded', 'mb-3', 'bg-white');
+            newFormDiv.innerHTML = emptyFormHtml;
+
+            formContainer.appendChild(newFormDiv);
+            totalFormsInput.value = formIndex + 1;
+        });
+    }
+});
+</script>
+
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Haftalik Dars Jadvali{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1 class="h2">Haftalik Dars Jadvali</h1>
+    {% if request.user.group %}
+        <p class="text-muted">{{ request.user.group.name }}-guruh uchun</p>
+    {% else %}
+        <p class="text-danger">Siz hech qaysi guruhga biriktirilmagansiz. Dars jadvali ko'rinmaydi.</p>
+    {% endif %}
+</div>
+
+<div class="row">
+    {% for item in full_timetable %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-header fw-bold">
+                {{ item.day }}
+                <span class="float-end text-muted small">{{ item.date|date:"d.m.Y" }}</span>
+            </div>
+            <div class="card-body">
+                {% if item.lessons %}
+                    {% for lesson_data in item.lessons %}
+                        {% with lesson=lesson_data.lesson %}
+                        <div class="lesson-item mb-3 p-2 border rounded">
+                            <p class="lesson-title fw-bold mb-1">{{ lesson.fan.nomi }}</p>
+                            
+                            {% if lesson.oqtuvchi %}
+                            <div class="lesson-info-line mb-1">
+                                <span class="icon"><i class="fas fa-user-tie"></i></span>
+                                <span>{{ lesson.oqtuvchi.full_name }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="lesson-info-line mb-1">
+                                <span class="icon"><i class="fas fa-clock"></i></span>
+                                <span>{{ lesson.boshlanish_vaqti|time:"H:i" }} - {{ lesson.tugash_vaqti|time:"H:i" }}</span>
+                            </div>
+                            
+                            {% if lesson.xona %}
+                            <div class="lesson-info-line mb-1">
+                                <span class="icon"><i class="fas fa-map-marker-alt"></i></span>
+                                <span>Xona: {{ lesson.xona }}</span>
+                            </div>
+                            {% endif %}
+                            
+                            {% if lesson.izoh %}
+                            <div class="lesson-info-line mb-1">
+                                <span class="icon"><i class="fas fa-sticky-note"></i></span>
+                                <span>{{ lesson.izoh }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% else %}
+                    <p class="text-center text-muted mt-3">Bu kunga darslar yo'q.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

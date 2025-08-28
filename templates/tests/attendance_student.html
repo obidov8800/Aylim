@@ -1,0 +1,59 @@
+{% extends 'base_dashboard.html' %}
+{% load static %}
+{# Yordamchi filtrlar endi kerak emas, shuning uchun load olib tashlandi #}
+
+{% block page_title %}Mening Davomatim{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1 class="h2">Mening Davomatim</h1>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header bg-light p-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <a href="{{ request.path }}{{ prev_month_url_params }}" class="btn btn-outline-primary btn-sm">&larr; Oldingi</a>
+            <h5 class="mb-0 fw-bold fs-6">{{ current_month_str }}</h5>
+            <a href="{{ request.path }}{{ next_month_url_params }}" class="btn btn-outline-primary btn-sm">Keyingi &rarr;</a>
+        </div>
+    </div>
+    <div class="card-body p-2 p-sm-3">
+        <div class="table-responsive">
+            <table class="calendar-table">
+                <thead>
+                    <tr>
+                        <th>Du</th><th>Se</th><th>Ch</th><th>Pa</th><th>Ju</th><th>Sha</th><th>Ya</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for week in calendar_data %}
+                    <tr>
+                        {% for day_data in week %}
+                        <td class="
+                            {% if day_data.date.month != current_month_num %}other-month{% endif %}
+                            {% if day_data.date.weekday >= 5 %}weekend{% endif %}
+                            {% if day_data.record %}status-{{ day_data.record.status }}{% endif %}
+                            ">
+                            <div class="day-content" title="{% if day_data.record %}Holat: {{ day_data.record.get_status_display }} {% if day_data.record.status == 'partial' %}({{ day_data.record }}){% endif %}{% else %}{{ day_data.date|date:'d-F' }}{% endif %}">
+                                <span class="day-number">{{ day_data.date.day }}</span>
+                                {% if day_data.record.status == 'partial' %}
+                                    <span class="missed-lessons">{{ day_data.record }}</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <hr class="my-3">
+        <div class="d-flex justify-content-center align-items-center small flex-wrap gap-3">
+            <div class="d-flex align-items-center"><span class="legend-dot status-present me-2"></span> Keldi</div>
+            <div class="d-flex align-items-center"><span class="legend-dot status-absent me-2"></span> Kelmadi</div>
+            <div class="d-flex align-items-center"><span class="legend-dot status-partial me-2"></span> Kechikdi</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

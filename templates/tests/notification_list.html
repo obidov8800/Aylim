@@ -1,0 +1,25 @@
+{% extends 'base_dashboard.html' %}
+
+{% block page_title %}Bildirishnomalar{% endblock %}
+
+{% block dashboard_content %}
+<div class="content-header">
+    <h1 class="h2">Bildirishnomalar</h1>
+</div>
+
+<div class="list-group mt-4">
+    {% for n in notifications %}
+    <div class="list-group-item list-group-item-action flex-column align-items-start {% if not n.is_read %}list-group-item-light{% endif %}">
+        <div class="d-flex w-100 justify-content-between">
+            {# ### TUZATISH: To'g'ri maydon nomlari ishlatildi ### #}
+            <p class="mb-1">{{ n.matn|linebreaksbr }}</p>
+            <small class="text-muted">{{ n.yaratilgan_sana|date:"d.m.Y H:i" }}</small>
+        </div>
+    </div>
+    {% empty %}
+    <div class="card p-4 text-center">
+        <p class="text-muted mb-0">Sizda hozircha bildirishnomalar mavjud emas.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

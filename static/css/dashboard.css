@@ -1,0 +1,820 @@
+/* static/css/dashboard.css */
+
+/* Google Fonts'dan chiroyli shriftni import qilish */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Asosiy o'zgaruvchilar */
+:root {
+    --primary-color: #4A69E2; /* Eduhouse'dagi ranglardan */
+    --background-color: #F7F8FC;
+    --sidebar-bg: #FFFFFF;
+    --card-bg: #FFFFFF;
+    --text-color: #5A6474;
+    --heading-color: #1B254B;
+    --border-color: #E2E8F0;
+    --shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: var(--background-color);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.dashboard-wrapper {
+    display: flex;
+}
+
+/* --- Yon menyu (Sidebar) --- */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    height: 100vh;
+    padding: 30px 20px;
+    position: fixed;
+    transition: transform 0.3s ease-in-out;
+    border-right: 1px solid var(--border-color);
+    z-index: 1000;
+}
+
+.sidebar-header {
+    margin-bottom: 40px;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--heading-color);
+}
+
+.sidebar-nav ul {
+    list-style: none;
+}
+
+.sidebar-nav li a {
+    display: flex;
+    align-items: center;
+    padding: 14px 18px;
+    color: var(--text-color);
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-nav li a:hover,
+.sidebar-nav li a.active {
+    background-color: var(--primary-color);
+    color: white;
+    transform: translateX(5px);
+    box-shadow: 0 4px 8px rgba(74, 105, 226, 0.3);
+}
+
+.sidebar-footer {
+    margin-top: auto;
+}
+
+/* --- Asosiy kontent --- */
+.main-content-container {
+    margin-left: 260px; /* sidebar kengligi */
+    width: calc(100% - 260px);
+    transition: all 0.3s ease-in-out;
+}
+.main-content {
+    padding: 30px;
+}
+
+.content-header {
+    margin-bottom: 30px;
+}
+
+.content-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--heading-color);
+}
+
+/* --- Kartochkalar --- */
+.card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.card-header {
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--heading-color);
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* --- Mobil qurilmalar uchun yuqori panel --- */
+.mobile-header {
+    display: none;
+    padding: 10px 20px;
+    background-color: var(--sidebar-bg);
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    align-items: center;
+}
+
+.menu-toggle-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--heading-color);
+}
+
+.mobile-header .header-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-left: 15px;
+    color: var(--heading-color);
+}
+
+/* Profil sahifasiga maxsus uslublar */
+.profile-main-card {
+    position: relative;
+}
+.profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 30px;
+    align-items: flex-start;
+}
+.info-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.info-list li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 15px;
+}
+.info-list li:last-child {
+    border-bottom: none;
+}
+.info-list strong {
+    color: var(--heading-color);
+    font-weight: 600;
+}
+.info-list span {
+    color: var(--text-color);
+}
+.btn-edit {
+    display: inline-block;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    border: none;
+}
+.btn-edit:hover {
+    background-color: #3a57b8;
+}
+
+/* --- RESPONSIVE DIZAYN (Media Queries) --- */
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 5px 0 15px rgba(0,0,0,0.1);
+    }
+    .main-content-container, .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+    .mobile-header {
+        display: flex;
+    }
+    .sidebar.show {
+        transform: translateX(0);
+    }
+    .profile-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.profile-card-body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Tahrirlash sahifasidagi formalar uchun */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--heading-color);
+}
+
+.form-control {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text-color);
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #ced4da;
+    border-radius: 0.5rem;
+    transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    outline: 0;
+    box-shadow: 0 0 0 0.25rem rgba(74, 105, 226, 0.25);
+}
+
+.btn-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+.profile-main-card .btn-edit {
+    margin-top: 1rem; /* 16px'ga teng yuqoridan joy */
+}
+
+/* Batafsil ma'lumotlar kartasini 2 ustunli qilish uchun */
+.details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 ta bir xil kenglikdagi ustun */
+    gap: 1rem; /* Ustunlar orasidagi masofa */
+}
+
+.details-grid p {
+    margin-bottom: 0;
+}
+
+/* Kichik ekranlar uchun "Batafsil ma'lumotlar"ni bitta ustunli qilish */
+@media (max-width: 768px) {
+    .details-grid {
+        grid-template-columns: 1fr;
+    }
+}
+.profile-card-unified {
+    display: flex;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.profile-sidebar {
+    flex-basis: 250px; /* Rasm turadigan qismning kengligi */
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.profile-content {
+    flex-grow: 1; /* Qolgan bo'sh joyni egallaydi */
+}
+
+/* Responsive qismini ham yangilaymiz */
+@media (max-width: 992px) {
+    /* ... mavjud @media qoidalari ... */
+    
+    .profile-card-unified {
+        flex-direction: column; /* Kichik ekranlarda ustma-ust bo'ladi */
+        align-items: center;
+    }
+}
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: 1rem; /* Sarlavha ostidagi chiziq uchun joy */
+    margin-bottom: 1.5rem; /* Tugma va kartochka orasidagi masofa */
+    border-bottom: 1px solid var(--border-color);
+}   
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px; /* Ikona va matn orasidagi joy */
+    padding: 6px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+
+/* Har bir tugma uchun alohida ranglar */
+.btn-import {
+    background-color: #e6f7ff;
+    color: #1890ff;
+    border-color: #91d5ff;
+}
+.btn-import:hover { background-color: #d0ebff; }
+
+/* .btn-edit bilan adashmaslik uchun nomini o'zgartirdik */
+.btn-edit-action {
+    background-color: #f6ffed;
+    color: #52c41a;
+    border-color: #b7eb8f;
+}
+.btn-edit-action:hover { background-color: #e9f7e2; }
+
+.btn-delete {
+    background-color: #fff1f0;
+    color: #f5222d;
+    border-color: #ffa39e;
+}
+.btn-delete:hover { background-color: #ffe5e3; }
+
+/* Tugmalar turgan katakchaga masofa berish uchun */
+.actions-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Tugmalar orasidagi masofa */
+}
+.question-form {
+    background-color: #f9f9f9;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.answer-options {
+    padding-left: 20px;
+    margin-top: 15px;
+}
+
+.answer-form {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 10px;
+}
+
+.answer-form input[type="text"] {
+    flex-grow: 1;
+}
+
+.add-form-row {
+    margin-top: 20px;
+}
+.lesson-item {
+    margin-bottom: 1.2rem;
+    padding-bottom: 1.2rem;
+    border-bottom: 1px solid var(--border-color);
+}
+.lesson-item:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+/* Har bir ma'lumot qatori uchun (ikona + matn) */
+.lesson-info-line {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+.lesson-info-line .icon {
+    width: 22px; /* Ikonkalar bir xil kenglikda bo'lishi uchun */
+    text-align: center;
+    margin-right: 12px;
+    color: #9b9b9b; /* Ikona rangi */
+}
+
+.lesson-title {
+    font-weight: 600;
+    color: var(--heading-color);
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+.attendance-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: flex-end;
+    margin-bottom: 20px;
+}
+
+.week-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+}
+.week-navigation button {
+    border: none;
+    background-color: var(--primary-color);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+}
+.week-navigation button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+}
+
+.table-responsive-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.attendance-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.attendance-table th, .attendance-table td {
+    border: 1px solid var(--border-color);
+    padding: 10px;
+    text-align: center;
+    white-space: nowrap;
+    min-width: 55px;
+}
+.attendance-table th {
+    background-color: #f0f2f5;
+    font-weight: 600;
+}
+.attendance-table .student-name {
+    text-align: left;
+    min-width: 200px;
+    white-space: normal;
+    position: sticky;
+    left: 0;
+    background-color: #f8f9fa;
+    z-index: 1;
+}
+
+.day-cell { cursor: pointer; }
+.day-cell.weekend, .day-cell.other-month {
+    background-color: #e9ecef;
+    cursor: not-allowed;
+    color: #adb5bd;
+}
+.status-present { background-color: #d1e7dd; color: #0f5132; font-weight: bold; }
+.status-absent { background-color: #f8d7da; color: #842029; font-weight: bold; }
+.status-partial { background-color: #fff3cd; color: #664d03; font-weight: bold; }
+
+
+/* Mobil qurilmalar uchun */
+.attendance-mobile-view { display: none; }
+
+@media (max-width: 768px) {
+    .attendance-desktop-view { display: none; }
+    .attendance-mobile-view { display: block; }
+
+    .student-attendance-card {
+        margin-bottom: 1rem;
+        border-radius: 8px;
+        padding: 1rem;
+        background-color: var(--card-bg);
+        box-shadow: var(--shadow);
+    }
+    .student-attendance-card h5 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+    .attendance-day-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        cursor: pointer;
+    }
+    .attendance-day-row:last-child { border-bottom: none; }
+    .attendance-day-row.weekend { background-color: #f8f9fa; cursor: not-allowed; }
+}
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed; /* Ustunlar kengligini bir xil qilish uchun */
+}
+.calendar-table th {
+    font-weight: 600;
+    text-align: center;
+    padding: 10px 5px;
+    color: var(--heading-color);
+}
+.calendar-table td {
+    border: 1px solid var(--border-color);
+    text-align: center;
+    padding: 15px 5px;
+    height: 70px; /* Katakcha balandligi */
+    font-weight: 500;
+}
+.calendar-table td.other-month {
+    background-color: #f8f9fa;
+    color: #ccc;
+}
+.status-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.status-dot-present { background-color: #28a745; }
+.status-dot-absent { background-color: #dc3545; }
+.status-dot-partial { background-color: #ffc107; }
+
+/* Mobil uchun */
+@media (max-width: 768px) {
+    .calendar-table td {
+        padding: 8px 2px;
+        height: 50px;
+        font-size: 12px;
+    }
+    .status-dot { width: 8px; height: 8px; }
+    .card-header a{
+        font-size: 10px;
+    }
+    .card-header h5{
+        font-size: 10px;
+    }
+}
+
+.attendance-cell-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* elementlar orasidagi masofa */
+}
+.attendance-cell-form .form-check {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+.attendance-cell-form .form-check-input {
+    float: none;
+    margin-left: 0;
+}
+
+/* Kechikish uchun maydonlar (boshida yashirin) */
+.partial-inputs {
+    display: none; /* JavaScript orqali ko'rsatiladi */
+    align-items: center;
+    gap: 5px;
+}
+.partial-inputs.show {
+    display: flex; /* JavaScript orqali ko'rsatiladi */
+}
+.partial-inputs input {
+    width: 40px;
+    padding: 2px 4px;
+    text-align: center;
+}
+.calendar-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 4px; /* Katakchalar orasida joy ochadi */
+    table-layout: fixed;
+}
+
+.calendar-table th {
+    font-weight: 600;
+    text-align: center;
+    padding: 0.5rem 0.1rem;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.calendar-table td {
+    padding: 0;
+    text-align: center;
+    vertical-align: middle;
+    border: none;
+}
+
+/* Har bir kun uchun asosiy stil */
+.day-content {
+    display: flex;
+    flex-direction: column; /* Raqam va soatni ustma-ust chiqarish uchun */
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Katakchani doim kvadrat saqlaydi */
+    border-radius: 8px; /* Qirralari yumaloq kvadrat */
+    font-weight: 500;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #f0f0f0;
+    background-color: #ffffff;
+    padding: 4px;
+}
+
+.day-content:hover {
+    cursor: help;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    transform: translateY(-2px);
+}
+
+.day-number {
+    font-size: 1.1rem; /* Kun raqami */
+}
+
+.missed-lessons {
+    font-size: 0.75rem; /* Kechikkan darslar soni */
+    font-weight: 700;
+}
+
+/* Boshqa oy kunlari uchun stil */
+.calendar-table .other-month .day-content {
+    color: #d0d0d0;
+    background-color: #f8f9fa;
+    border-color: transparent;
+}
+
+/* --- Status Ranglari --- */
+.status-present .day-content {
+    background-color: #d1e7dd;
+    border-color: #a3cfbb;
+    color: #0f5132;
+}
+
+.status-absent .day-content {
+    background-color: #f8d7da;
+    border-color: #f1b0b7;
+    color: #842029;
+}
+
+.status-partial .day-content {
+    background-color: #fff3cd;
+    border-color: #ffe69c;
+    color: #664d03;
+}
+
+/* --- Izoh (Legend) uchun stillar --- */
+.legend-dot {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 4px;
+}
+.legend-dot.status-present { background-color: #d1e7dd; border: 1px solid #a3cfbb; }
+.legend-dot.status-absent { background-color: #f8d7da; border: 1px solid #f1b0b7; }
+.legend-dot.status-partial { background-color: #fff3cd; border: 1px solid #ffe69c; }
+.test-card-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); /* Responsive grid */
+    gap: 30px; /* Kartochkalar orasidagi masofa */
+}
+
+/* Har bir test kartochkasi uchun qo'shimcha uslublar */
+.test-card {
+    display: flex;
+    flex-direction: column; /* Ichidagi elementlarni vertikal joylashtirish */
+    height: 100%; /* Barcha kartochkalar bir xil balandlikda bo'lishi uchun */
+}
+
+.test-card .card-body {
+    flex-grow: 1; /* Asosiy kontentni kengaytiradi */
+    display: flex;
+    flex-direction: column;
+}
+
+.test-card .card-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--heading-color);
+}
+
+.test-card .card-info {
+    list-style: none;
+    padding: 0;
+    margin: 1rem 0;
+    color: var(--text-color);
+}
+
+.test-card .card-info li {
+    margin-bottom: 0.5rem;
+}
+
+.test-card .card-footer {
+    margin-top: auto; /* Tugmani har doim pastga yopishtiradi */
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+}
+.test-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: 1px solid #e2e8f0; /* var(--border-color) */
+}
+
+.test-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+
+.card-footer {
+    border-top: 1px solid #e2e8f0 !important; /* var(--border-color) */
+}
+
+.border-dashed {
+    border-style: dashed !important;
+}
+.question-result-block {
+    background-color: #f8f9fa;
+}
+.list-group-item .fa-check-circle {
+    font-size: 1.2rem;
+}
+.list-group-item .fa-times-circle {
+    font-size: 1.2rem;
+}
+.options-container .form-check-input[type="radio"] {
+    /* Barcha eski, xato ishlayotgan stillarni bekor qilish */
+    -webkit-appearance: radio !important;
+    -moz-appearance: radio !important;
+    appearance: radio !important;
+    
+    /* Bootstrap'ning standart radio tugmasi ko'rinishiga keltirish */
+    border-radius: 50% !important;
+    height: 1.25em !important;
+    width: 1.25em !important;
+    margin-top: 0.15em !important;
+    border: 1px solid #b0b0b0 !important;
+    background-color: #fff !important;
+}
+
+/* Tanlangan radio tugma uchun stil */
+.options-container .form-check-input[type="radio"]:checked {
+    border-color: var(--primary-color) !important;
+    background-color: var(--primary-color) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='2' fill='%23fff'/%3e%3c/svg%3e") !important;
+}
+
+/* Radio tugma fokusda bo'lganda */
+.options-container .form-check-input[type="radio"]:focus {
+    box-shadow: 0 0 0 0.2rem rgba(74, 105, 226, 0.25) !important;
+}
+
+.options-container .form-check-label {
+    padding-left: 0.5em;
+}   
+.profile-card .profile-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #e9ecef;
+}
+
+.profile-card .card-title {
+    font-weight: 600;
+    color: var(--heading-color);
+}
+
+.profile-details-list {
+    margin-bottom: 0;
+}
+
+.profile-details-list dt {
+    font-weight: 600;
+    color: var(--heading-color);
+    font-size: 0.85rem;
+    margin-bottom: 2px;
+}
+
+.profile-details-list dd {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+    padding-left: 0.5rem;
+    border-left: 2px solid #e9ecef;
+}
+
+.table-hover tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+.fw-medium {
+    font-weight: 500 !important;
+}

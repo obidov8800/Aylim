@@ -1,0 +1,436 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ro'yxatdan o'tish - Aylim Tibbiyot texnikumi</title>
+    
+    <!-- Fontlar va ikonkalar -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #2A7CC7;
+            --primary-dark: #1C6CB8;
+            --secondary: #28a745;
+            --secondary-dark: #218838;
+            --text-primary: #1a202c;
+            --text-secondary: #4a5568;
+            --border-color: #e2e8f0;
+            --error-color: #e53e3e;
+            --success-color: #38a169;
+            --bg-light: #f5f7fa;
+            --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: var(--bg-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: var(--text-primary);
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 550px;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        .card {
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            padding: 40px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .logo {
+            max-width: 180px;
+            height: auto;
+            margin-bottom: 15px;
+        }
+        
+        .card-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 30px;
+            color: var(--primary);
+            position: relative;
+            padding-bottom: 15px;
+        }
+        
+        .card-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 2px;
+        }
+        
+        .form-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            background-color: #f9fafc;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(42, 124, 199, 0.2);
+            background-color: #fff;
+        }
+        
+        .form-control.error {
+            border-color: var(--error-color);
+        }
+        
+        .error-text {
+            color: var(--error-color);
+            font-size: 12px;
+            margin-top: 5px;
+            display: block;
+        }
+        
+        .password-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        
+        .password-wrapper .form-control {
+            padding-right: 45px;
+        }
+        
+        .password-toggle-icon {
+            position: absolute;
+            right: 15px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: color 0.2s;
+            font-size: 18px;
+        }
+        
+        .password-toggle-icon:hover {
+            color: var(--primary);
+        }
+        
+        .btn-submit {
+            width: 100%;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(to right, var(--primary), var(--primary-dark));
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(42, 124, 199, 0.25);
+        }
+        
+        .btn-submit:hover {
+            background: linear-gradient(to right, var(--primary-dark), var(--primary));
+            box-shadow: 0 6px 16px rgba(42, 124, 199, 0.35);
+            transform: translateY(-2px);
+        }
+        
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+        
+        .text-center {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .text-center a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.2s;
+            position: relative;
+        }
+        
+        .text-center a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: var(--primary);
+            transition: width 0.3s;
+        }
+        
+        .text-center a:hover::after {
+            width: 100%;
+        }
+        
+        .text-center a:hover {
+            color: var(--primary-dark);
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .alert-danger {
+            background-color: #fed7d7;
+            color: var(--error-color);
+            border: 1px solid #feb2b2;
+        }
+        
+        .form-hint {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .card {
+                padding: 30px 20px;
+            }
+            
+            .card-title {
+                font-size: 24px;
+            }
+            
+            .btn-submit {
+                padding: 14px;
+            }
+        }
+        
+        .password-strength {
+            margin-top: 8px;
+            height: 5px;
+            border-radius: 3px;
+            background-color: #eee;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .password-strength-fill {
+            height: 100%;
+            width: 0;
+            border-radius: 3px;
+            transition: width 0.3s, background-color 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <div class="logo-container">
+                <!-- Logotip joyi -->
+                <div class="logo-placeholder" style="font-size: 32px; color: var(--primary); font-weight: bold;">Aylim Tibbiyot texnikumi</div>
+            </div>
+            
+            <h2 class="card-title">Ro'yxatdan O'tish</h2>
+            
+            <form method="post" enctype="multipart/form-data" id="registration-form">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="form-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        
+                        {% if field.name == 'password' %}
+                            <div class="password-wrapper">
+                                {{ field }}
+                                <i class="fas fa-eye password-toggle-icon" id="password-toggle"></i>
+                            </div>
+                            <div class="password-strength">
+                                <div class="password-strength-fill" id="password-strength-bar"></div>
+                            </div>
+                            <span class="form-hint">Kamida 8 ta belgi, raqam va harflardan iborat bo'lishi kerak</span>
+                        {% else %}
+                            {{ field }}
+                            {% if field.help_text %}
+                                <span class="form-hint">{{ field.help_text }}</span>
+                            {% endif %}
+                        {% endif %}
+                        
+                        {% for error in field.errors %}
+                            <span class="error-text">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                
+                <button type="submit" class="btn-submit">Ro'yxatdan o'tish</button>
+            </form>
+            
+            <div class="text-center">
+                <p>Hisobingiz bormi? <a href="{% url 'users:login' %}">Tizimga kirish</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePassword = document.getElementById('password-toggle');
+            const passwordField = document.getElementById('id_password');
+            const strengthBar = document.getElementById('password-strength-bar');
+            const registrationForm = document.getElementById('registration-form');
+            
+            // Parolni ko'rsatish/yashirish
+            if (togglePassword && passwordField) {
+                togglePassword.addEventListener('click', function (e) {
+                    const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordField.setAttribute('type', type);
+                    
+                    this.classList.toggle('fa-eye');
+                    this.classList.toggle('fa-eye-slash');
+                });
+            }
+            
+            // Parol kuchini tekshirish
+            if (passwordField && strengthBar) {
+                passwordField.addEventListener('input', function() {
+                    const password = this.value;
+                    let strength = 0;
+                    
+                    // Parol uzunligi
+                    if (password.length >= 8) strength += 25;
+                    
+                    // Katta harf mavjudligi
+                    if (/[A-Z]/.test(password)) strength += 25;
+                    
+                    // Raqam mavjudligi
+                    if (/[0-9]/.test(password)) strength += 25;
+                    
+                    // Maxsus belgi mavjudligi
+                    if (/[^A-Za-z0-9]/.test(password)) strength += 25;
+                    
+                    // Rangi va kengligini o'zgartirish
+                    strengthBar.style.width = strength + '%';
+                    
+                    if (strength < 50) {
+                        strengthBar.style.backgroundColor = '#e53e3e'; // Qizil
+                    } else if (strength < 75) {
+                        strengthBar.style.backgroundColor = '#dd6b20'; // Sariq
+                    } else {
+                        strengthBar.style.backgroundColor = '#38a169'; // Yashil
+                    }
+                });
+            }
+            
+            // Formani yuborishdan oldin tekshirish
+            if (registrationForm) {
+                registrationForm.addEventListener('submit', function(e) {
+                    let isValid = true;
+                    const inputs = this.querySelectorAll('.form-control');
+                    
+                    inputs.forEach(input => {
+                        if (!input.value.trim()) {
+                            isValid = false;
+                            input.classList.add('error');
+                            
+                            if (!input.nextElementSibling || !input.nextElementSibling.classList.contains('error-text')) {
+                                const error = document.createElement('span');
+                                error.className = 'error-text';
+                                error.textContent = 'Maydonni to\'ldirish majburiy';
+                                input.parentNode.appendChild(error);
+                            }
+                        } else {
+                            input.classList.remove('error');
+                            const errorElement = input.nextElementSibling;
+                            if (errorElement && errorElement.classList.contains('error-text')) {
+                                errorElement.remove();
+                            }
+                        }
+                    });
+                    
+                    if (!isValid) {
+                        e.preventDefault();
+                    }
+                });
+            }
+            
+            // Inputlarni tekshirish
+            const inputs = document.querySelectorAll('.form-control');
+            inputs.forEach(input => {
+                input.addEventListener('blur', function() {
+                    if (!this.value.trim()) {
+                        this.classList.add('error');
+                    } else {
+                        this.classList.remove('error');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

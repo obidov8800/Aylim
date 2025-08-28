@@ -1,0 +1,85 @@
+{% extends 'base_dashboard.html' %}
+
+{% block page_title %}Test Natijasi{% endblock %}
+
+{% block dashboard_content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h2 mb-0">{{ result.test.title }} - Natijalar</h1>
+        <p class="text-muted mb-0">{{ result.student.full_name }}</p>
+    </div>
+    <a href="{% url 'tests:test_list' %}" class="btn btn-secondary">Orqaga</a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header fw-bold">Umumiy Natija</div>
+    <div class="card-body text-center">
+        {# ### TUZATISH: Ballarni to'liq ko'rsatish ### #}
+        <h3 class="display-4 fw-bold" style="color: {{ result.grade_color|default:'#000' }};">{{ result.score|floatformat:2 }} ball</h3>
+        
+        {# ### YANGILIK: To'g'ri javoblar sonini chiqarish ### #}
+        <p class="fs-5 text-muted">
+            To'g'ri javoblar soni: 
+            <strong>{{ correct_answers_count }} / {{ total_questions_in_attempt }}</strong>
+        </p>
+
+        <p class="fs-4"><span class="badge" style="background-color: {{ result.grade_color|default:'#6c757d' }};">{{ result.grade }}</span></p>
+        <p class="text-muted">Topshirilgan vaqt: {{ result.completion_time|date:"d.m.Y, H:i" }}</p>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header fw-bold">Javoblar Tahlili</div>
+    <div class="card-body">
+        {% for item in detailed_results %}
+            {# ### YANGILIK: Javob berilmagan bo'lsa, butun blokni sariq qilamiz ### #}
+            <div class="question-result-block mb-4 p-3 border rounded {% if not item.selected_answer %}border-warning bg-warning-light{% endif %}">
+                <p class="fw-bold">{{ forloop.counter }}. {{ item.question.question_text }}</p>
+
+                {# Agar javob berilmagan bo'lsa, alohida xabar chiqaramiz #}
+                {% if not item.selected_answer %}
+                    <p class="small text-danger fw-bold">Siz bu savolga javob bermagansiz.</p>
+                {% endif %}
+                <hr class="my-2">
+                
+                <ul class="list-group">
+                    {% for option in item.options %}
+                        {% if option.is_correct %}
+                            {# Bu haqiqiy to'g'ri javob #}
+                            <li class="list-group-item list-group-item-success">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ option.answer_text }}</span>
+                                    <span class="d-flex align-items-center">
+                                        {% if option == item.selected_answer %}
+                                            <small class="me-2 text-success fw-bold">(Sizning javobingiz)</small>
+                                        {% endif %}
+                                        <i class="fas fa-check-circle text-success fs-5" title="To'g'ri javob"></i>
+                                    </span>
+                                </div>
+                            </li>
+                        {% elif option == item.selected_answer %}
+                             {# Bu siz tanlagan, lekin noto'g'ri javob #}
+                            <li class="list-group-item list-group-item-danger">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>{{ option.answer_text }}</span>
+                                    <span class="d-flex align-items-center">
+                                        <small class="me-2 text-danger fw-bold">(Sizning javobingiz)</small>
+                                        <i class="fas fa-times-circle text-danger fs-5" title="Noto'g'ri tanlov"></i>
+                                    </span>
+                                </div>
+                            </li>
+                        {% else %}
+                             {# Bu qolgan, neytral variantlar #}
+                            <li class="list-group-item">
+                                {{ option.answer_text }}
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        {% empty %}
+            <p class="text-muted text-center">Bu test natijasi uchun javoblar tahlili mavjud emas.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
