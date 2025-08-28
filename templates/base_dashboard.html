@@ -19,23 +19,24 @@
             <div class="sidebar-header">Aylim.uz</div>
             <nav class="sidebar-nav">
                 <ul>
-                    {% if request.user.rol == 'TALABA' %}
-                        <li><a href="{% url 'tests:test_list' %}" class="{% if active_page == 'testlar' %}active{% endif %}"><i class="fas fa-file-alt fa-fw"></i> Testlar</a></li>
-                        <li><a href="{% url 'tests:student_attendance' %}" class="{% if active_page == 'davomat' %}active{% endif %}"><i class="fas fa-user-check fa-fw"></i> Davomat</a></li>
-                    {% elif request.user.rol == 'PEDAGOG' %}
-                         <li><a href="{% url 'tests:teacher_test_list' %}" class="{% if active_page == 'mening_testlarim' %}active{% endif %}"><i class="fas fa-tasks fa-fw"></i> Mening testlarim</a></li>
-                         {% if perms.tests.can_manage_attendance %}
-                            <li><a href="{% url 'tests:attendance_management' %}" class="{% if active_page == 'davomat_boshqarish' %}active{% endif %}"><i class="fas fa-calendar-check fa-fw"></i> Davomatni Boshqarish</a></li>
-                         {% endif %}
-                    {% endif %}
-                    <li><a href="{% url 'tests:timetable' %}" class="{% if active_page == 'dars_jadvali' %}active{% endif %}"><i class="fas fa-calendar-alt fa-fw"></i> Dars Jadvali</a></li>
-                    <li>
-            <a href="{% url 'users:notification_list' %}" class="{% if active_page == 'bildirishnomalar' %}active{% endif %}">
-                <i class="fas fa-bell fa-fw"></i>
-                <span>Bildirishnomalar</span>
-                {% if unread_notifications_count > 0 %}
-                    <span class="badge bg-danger ms-auto">{{ unread_notifications_count }}</span>
-                {% endif %}
+{% if request.user.rol == 'TALABA' %}
+    <li><a href="{% url 'tests:test_list' %}" class="{% if active_page == 'testlar' %}active{% endif %}">
+        <i class="fas fa-file-alt fa-fw"></i> Testlar</a></li>
+    <li><a href="{% url 'tests:student_attendance' %}" class="{% if active_page == 'davomat' %}active{% endif %}">
+        <i class="fas fa-user-check fa-fw"></i> Davomat</a></li>
+
+{% elif request.user.rol == 'OQITUVCHI' %}
+    <li><a href="{% url 'tests:teacher_test_list' %}" class="{% if active_page == 'mening_testlarim' %}active{% endif %}">
+        <i class="fas fa-tasks fa-fw"></i> Mening testlarim</a></li>
+    <li><a href="{% url 'tests:attendance_management' %}" class="{% if active_page == 'davomat_boshqarish' %}active{% endif %}">
+        <i class="fas fa-calendar-check fa-fw"></i> Davomatni Boshqarish</a></li>
+
+{% elif request.user.rol == 'TYUTOR' or request.user.rol == 'ADMIN' %}
+    <li><a href="{% url 'tests:attendance_management' %}" class="{% if active_page == 'davomat_boshqarish' %}active{% endif %}">
+        <i class="fas fa-calendar-check fa-fw"></i> Davomatni Boshqarish</a></li>
+    <li><a href="/mumiyo/">
+        <i class="fas fa-tools fa-fw"></i> Admin panel</a></li>
+{% endif %}
             </a>
         </li>
                     <li><a href="{% url 'users:profile' %}" class="{% if active_page == 'profil' %}active{% endif %}"><i class="fas fa-user-circle fa-fw"></i> Mening profilim</a></li>

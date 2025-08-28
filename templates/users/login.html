@@ -4,116 +4,436 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tizimga Kirish - Aylim Tibbiyot</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="Aylim Tibbiyot Texnikumi tizimiga xavfsiz kirish">
+    <title>Tizimga Kirish - Aylim Tibbiyot Texnikumi</title>
 
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
     <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #93c5fd;
+            --secondary-color: #10b981;
+            --error-color: #ef4444;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --text-color: #1f2937;
+            --text-light: #6b7280;
+            --background-color: #f9fafb;
+            --card-background: #ffffff;
+            --border-color: #e5e7eb;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: #f4f7f6;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
             margin: 0;
             padding: 0;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
+            color: var(--text-color);
+            line-height: 1.5;
         }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+        
+        .logo-container {
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 80px;
+            width: auto;
+            object-fit: contain;
+        }
+        
         .container {
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;
             margin: 20px;
+            animation: fadeIn 0.5s ease-out;
         }
+        
         .card {
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+            background-color: var(--card-background);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            padding: 2.5rem;
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
         }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
         .card-title {
             text-align: center;
-            font-size: 24px;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .card-subtitle {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+            font-size: 1rem;
+        }
+        
+        .admin-list {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 1rem 1.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .admin-list p {
             font-weight: 600;
-            margin-bottom: 25px;
-            color: #333;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
         }
+        
+        .admin-list ul {
+            list-style-type: none;
+            padding-left: 0.5rem;
+        }
+        
+        .admin-list li {
+            padding: 0.25rem 0;
+            color: var(--text-light);
+            display: flex;
+            align-items: center;
+        }
+        
+        .admin-list li:before {
+            content: "•";
+            color: var(--primary-color);
+            font-weight: bold;
+            display: inline-block;
+            width: 1em;
+            margin-right: 0.5rem;
+        }
+        
         .form-group {
-            margin-bottom: 20px;
-            position: relative; /* Ikona uchun kerak */
+            margin-bottom: 1.5rem;
+            position: relative;
         }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
         .form-control {
             width: 100%;
-            padding: 12px 15px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box; 
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+            background-color: #f9fafb;
         }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+            background-color: #ffffff;
+        }
+        
+        .password-wrapper {
+            position: relative;
+        }
+        
         .password-wrapper .form-control {
-            padding-right: 45px; /* Ikona uchun joy */
+            padding-right: 3rem;
         }
+        
         .password-toggle-icon {
             position: absolute;
             top: 50%;
-            right: 15px;
+            right: 1rem;
             transform: translateY(-50%);
             cursor: pointer;
-            color: #777;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            font-size: 1.125rem;
+            padding: 0.25rem;
+            border-radius: 4px;
+            transition: color 0.2s ease;
         }
+        
+        .password-toggle-icon:hover {
+            color: var(--primary-color);
+            background-color: #f1f5f9;
+        }
+        
         .btn {
             width: 100%;
-            padding: 12px;
-            font-size: 16px;
+            padding: 0.875rem 1rem;
+            font-size: 1rem;
             font-weight: 600;
             color: #fff;
-            background-color: #007bff;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
         }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark) 0%, #1e40af 100%);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transform: translateY(-1px);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
         .alert {
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 0.875rem 1rem;
+            margin-bottom: 1.5rem;
             border: 1px solid transparent;
-            border-radius: 4px;
+            border-radius: 8px;
             color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
+            background-color: #fef2f2;
+            border-color: #fecaca;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
         }
+        
+        .alert i {
+            font-size: 1.25rem;
+        }
+        
+        .security-notice {
+            background-color: #fffbeb;
+            border: 1px solid #fcd34d;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+        }
+        
+        .security-notice i {
+            color: var(--warning-color);
+            font-size: 1.25rem;
+            margin-top: 0.125rem;
+        }
+        
+        .security-notice-content {
+            flex: 1;
+        }
+        
+        .security-notice h4 {
+            color: var(--warning-color);
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .security-notice p {
+            color: var(--text-light);
+            font-size: 0.75rem;
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+        
         .text-center {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 1.5rem;
         }
+        
+        .text-center p {
+            color: var(--text-light);
+        }
+        
         .text-center a {
-            color: #007bff;
+            color: var(--primary-color);
             text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+        
+        .text-center a:after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+        
+        .text-center a:hover:after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+        
+        .footer {
+            margin-top: 3rem;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            width: 100%;
+            padding: 0 20px;
+        }
+        
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .footer-logo {
+            height: 50px;
+            width: auto;
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .footer-divider {
+            margin: 1.5rem auto;
+            width: 50%;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .copyright {
+            margin-top: 0.5rem;
+        }
+        
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Responsive design */
+        @media (max-width: 480px) {
+            .container {
+                margin: 1rem;
+            }
+            
+            .card {
+                padding: 1.5rem;
+            }
+            
+            .logo {
+                height: 70px;
+            }
+            
+            .card-title {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
+    <div class="header">
+        <div class="logo-container">
+            <!-- Logotip joyi - favicon kabi, asl logotip faylining joylashuviga qarab sozlang -->
+            <img src="{% static 'images/AYLIM.png' %}" alt="Aylim Tibbiyot Texnikumi" class="logo">
+        </div>
+    </div>
+    
     <div class="container">
         <div class="card">
             <h2 class="card-title">Tizimga Kirish</h2>
+            <p class="card-subtitle">Ma'lumotlaringizni kiriting</p>
+            
+            <div class="admin-list">
+                <p>TALABA</p>
+                <ul>
+                    <li>Login: S0000</li>
+                    <li>Parol: ......</li>
+                </ul>
+            </div>
             
             {% if form.non_field_errors %}
                 <div class="alert">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
-                    {% endfor %}
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
                 </div>
             {% endif %}
 
-            <form method="post">
+            <form method="post" autocomplete="on">
                 {% csrf_token %}
                 <div class="form-group">
-                    <input type="text" name="username" class="form-control" placeholder="Foydalanuvchi nomi yoki ID" required id="id_username">
+                    <label for="id_username" class="form-label">Foydalanuvchi nomi yoki ID</label>
+                    <input type="text" name="username" class="form-control" placeholder="Foydalanuvchi nomi" required id="id_username" autocomplete="username">
                 </div>
-                <div class="form-group password-wrapper">
-                    <input type="password" name="password" class="form-control" placeholder="Parol" required id="id_password">
-                    <i class="fas fa-eye password-toggle-icon" id="password-toggle"></i>
+                <div class="form-group">
+                    <label for="id_password" class="form-label">Parol</label>
+                    <div class="password-wrapper">
+                        <input type="password" name="password" class="form-control" placeholder="Parol" required id="id_password" autocomplete="current-password">
+                        <button type="button" class="password-toggle-icon" id="password-toggle" aria-label="Parolni ko'rsatish">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="btn">Kirish</button>
             </form>
+
+            <div class="security-notice">
+                <i class="fas fa-shield-alt"></i>
+                <div class="security-notice-content">
+                    <h4>XAVFSIZLIK OGOHLANTIRISHI</h4>
+                    <p>Ushbu tizim faqat autorizatsiyadan o'tgan foydalanuvchilar uchun. Shaxsiy ma'lumotlaringizni uchinchi shaxslar bilan baham ko'rmang. Barcha kirish harakatlari monitoring qilinadi va loglanadi.</p>
+                </div>
+            </div>
 
             <div class="text-center">
                 <p>Hisobingiz yo'qmi? <a href="{% url 'users:register' %}">Ro'yxatdan o'tish</a></p>
@@ -121,20 +441,68 @@
         </div>
     </div>
 
+    <div class="footer">
+        <div class="footer-divider"></div>
+        <div class="footer-content">
+            <!-- Oliy ta'lim vazirligi logotipi agar mavjud bo'lsa -->
+            <!-- <img src="{% static 'images/ministry_logo.png' %}" alt="O'zbekiston Respublikasi Oliy ta'lim, fan va innovatsiya vazirligi" class="footer-logo"> -->
+            <p>© 2023 Aylim Tibbiyot Texnikumi</p>
+            <p class="copyright">O'zbekiston Respublikasi Oliy ta'lim, fan va innovatsiya vazirligi</p>
+        </div>
+    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const togglePassword = document.getElementById('password-toggle');
             const passwordField = document.getElementById('id_password');
+            const icon = togglePassword.querySelector('i');
 
             if (togglePassword && passwordField) {
                 togglePassword.addEventListener('click', function () {
                     const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
                     passwordField.setAttribute('type', type);
                     
-                    this.classList.toggle('fa-eye');
-                    this.classList.toggle('fa-eye-slash');
+                    icon.classList.toggle('fa-eye');
+                    icon.classList.toggle('fa-eye-slash');
+                    
+                    // Tugma a11y atributlarini yangilash
+                    const label = type === 'password' ? "Parolni ko'rsatish" : "Parolni yashirish";
+                    this.setAttribute('aria-label', label);
                 });
             }
+            
+            // Formani yopiq xonada ishlatish xavfsizligi
+            document.querySelector('form').addEventListener('submit', function(e) {
+                // Bu joyda qo'shimcha validatsiyalar qo'shishingiz mumkin
+                console.log('Forma yuborilmoqda...');
+                
+                // Ma'lumotlarning xavfsizligini ta'minlash
+                const username = document.getElementById('id_username').value;
+                const password = document.getElementById('id_password').value;
+                
+                if (username && password) {
+                    // Ma'lumotlar to'g'ri kiritilganligini tekshirish
+                    console.log('Foydalanuvchi ma\'lumotlari kiritildi');
+                }
+            });
+            
+            // Autocomplete o'chirilgan bo'lsa ham, foydalanuvchi tajribasini yaxshilash
+            const usernameField = document.getElementById('id_username');
+            if (usernameField && !usernameField.hasAttribute('autocomplete')) {
+                usernameField.setAttribute('autocomplete', 'username');
+            }
+            
+            // Sahifa yopilayotganda xavfsizlik choralari
+            window.addEventListener('beforeunload', function (e) {
+                // Forma to'ldirilgan bo'lsa, ogohlantirish chiqarish
+                const username = document.getElementById('id_username').value;
+                const password = document.getElementById('id_password').value;
+                
+                if (username || password) {
+                    e.preventDefault();
+                    e.returnValue = 'Siz kiritgan ma\'lumotlar saqlanmagan bo\'lishi mumkin. Sahifadan chiqishni xohlaysizmi?';
+                }
+            });
         });
     </script>
 </body>
