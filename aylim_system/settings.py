@@ -54,9 +54,9 @@ WSGI_APPLICATION = 'aylim_system.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'postgres',       # yoki agar boshqa baza yaratsang, o‘shani
-        'USER': 'postgres',
-        'PASSWORD': 'obidov8800',  # aynan yuqorida kiritgan parol
+        'NAME': 'aylim_db',       # yoki agar boshqa baza yaratsang, o‘shani
+        'USER': 'aylim_user',
+        'PASSWORD': 'aylimpass',  # aynan yuqorida kiritgan parol
         'HOST': 'localhost',
         'PORT': '5432',
     }
