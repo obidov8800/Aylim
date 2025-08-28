@@ -409,7 +409,7 @@
                 </div>
             {% endif %}
 
-            <form method="post" autocomplete="on">
+            <form method="post" autocomplete="on" id="loginForm">
                 {% csrf_token %}
                 <div class="form-group">
                     <label for="id_username" class="form-label">Foydalanuvchi nomi yoki ID</label>
@@ -445,9 +445,9 @@
         <div class="footer-divider"></div>
         <div class="footer-content">
             <!-- Oliy ta'lim vazirligi logotipi agar mavjud bo'lsa -->
-            <!-- <img src="{% static 'images/ministry_logo.png' %}" alt="O'zbekiston Respublikasi Oliy ta'lim, fan va innovatsiya vazirligi" class="footer-logo"> -->
-            <p>© 2023 Aylim Tibbiyot Texnikumi</p>
             <p class="copyright">O'zbekiston Respublikasi Oliy ta'lim, fan va innovatsiya vazirligi</p>
+            <p>© 2025 Aylim Tibbiyot Texnikumi</p>
+
         </div>
     </div>
 
@@ -456,6 +456,7 @@
             const togglePassword = document.getElementById('password-toggle');
             const passwordField = document.getElementById('id_password');
             const icon = togglePassword.querySelector('i');
+            const loginForm = document.getElementById('loginForm');
 
             if (togglePassword && passwordField) {
                 togglePassword.addEventListener('click', function () {
@@ -471,11 +472,8 @@
                 });
             }
             
-            // Formani yopiq xonada ishlatish xavfsizligi
-            document.querySelector('form').addEventListener('submit', function(e) {
-                // Bu joyda qo'shimcha validatsiyalar qo'shishingiz mumkin
-                console.log('Forma yuborilmoqda...');
-                
+            // Formani yuborishni qayta ishlash
+            loginForm.addEventListener('submit', function(e) {
                 // Ma'lumotlarning xavfsizligini ta'minlash
                 const username = document.getElementById('id_username').value;
                 const password = document.getElementById('id_password').value;
@@ -483,26 +481,23 @@
                 if (username && password) {
                     // Ma'lumotlar to'g'ri kiritilganligini tekshirish
                     console.log('Foydalanuvchi ma\'lumotlari kiritildi');
+                    
+                    // Forma yuborilganda, beforeunload eventini o'chirish
+                    window.removeEventListener('beforeunload', preventUnload);
                 }
             });
+            
+            // Sahifadan chiqishda ogohlantirishni oldini olish
+            let preventUnload = function(e) {
+                // Funktsiyani bo'sh qoldirdik, hech narsa qaytarmaymiz
+                // Bu brauzerning standart ogohlantirish xabarini ko'rsatmasligiga olib keladi
+            };
             
             // Autocomplete o'chirilgan bo'lsa ham, foydalanuvchi tajribasini yaxshilash
             const usernameField = document.getElementById('id_username');
             if (usernameField && !usernameField.hasAttribute('autocomplete')) {
                 usernameField.setAttribute('autocomplete', 'username');
             }
-            
-            // Sahifa yopilayotganda xavfsizlik choralari
-            window.addEventListener('beforeunload', function (e) {
-                // Forma to'ldirilgan bo'lsa, ogohlantirish chiqarish
-                const username = document.getElementById('id_username').value;
-                const password = document.getElementById('id_password').value;
-                
-                if (username || password) {
-                    e.preventDefault();
-                    e.returnValue = 'Siz kiritgan ma\'lumotlar saqlanmagan bo\'lishi mumkin. Sahifadan chiqishni xohlaysizmi?';
-                }
-            });
         });
     </script>
 </body>
